@@ -1,0 +1,74 @@
+# yaml-language-server: $schema=https://unpkg.com/@powersync/service-sync-rules@latest/schema/sync_rules.json
+#
+# See Documentation for more information:
+# https://docs.powersync.com/usage/sync-rules
+#
+# Note that changes to this file are not watched.
+# The service needs to be restarted for changes to take effect.
+
+bucket_definitions:
+  global:
+    priority: 0
+    data:
+      # for data query see: https://docs.powersync.com/usage/sync-rules/data-queries
+      # for supported operators see: https://docs.powersync.com/usage/sync-rules/operators-and-functions
+      # schemas are supported https://docs.powersync.com/usage/sync-rules/schemas-and-connections#schemas-postgres
+      - SELECT * FROM onboarding_steps
+
+  basic_user_data:
+    priority: 1
+    # Select parameters for the bucket, using the current user_id see: https://docs.powersync.com/usage/sync-rules/parameter-queries
+    parameters: SELECT request.user_id() as user_id # (request.user_id() comes from the JWT token)
+    data:
+      # Select data rows/documents using the parameters above
+      - SELECT * FROM settings WHERE user_id = bucket.user_id
+      - SELECT * FROM onboardings WHERE user_id = bucket.user_id
+      - SELECT * FROM profiles WHERE user_id = bucket.user_id
+      - SELECT * FROM social_accounts WHERE user_id = bucket.user_id
+      # for many-to-many joints see https://docs.powersync.com/usage/sync-rules/guide-many-to-many-and-join-tables
+
+      # Sync spaces owned by the user
+      - SELECT * FROM spaces WHERE user_id = bucket.user_id
+
+  # Sync spaces the user is a member of (via the space_user table)
+  # - SELECT spaces.* FROM spaces
+  #   WHERE id IN (
+  #     SELECT space_id FROM space_user
+  #     WHERE user_id = bucket.user_id
+  #   )
+
+  # Also sync the space_user table for the user to track memberships
+  # - SELECT * FROM space_user WHERE user_id = bucket.user_id
+
+  tracking_data:
+    parameters: SELECT request.user_id() as user_id # (request.user_id() comes from the JWT token)
+    data:
+      - SELECT * FROM deed_trackings WHERE user_id = bucket.user_id
+
+  deeds_content:
+    priority: 0
+    accept_potentially_dangerous_queries: true
+    parameters:
+      - SELECT request.parameters() ->> 'locale' as current_locale
+    data:
+      # deeds content based on the user locale
+      - SELECT * FROM content_deeds_en WHERE bucket.current_locale = 'en'
+      - SELECT * FROM content_deeds_ar WHERE bucket.current_locale = 'ar'
+
+  quran_content:
+    data:
+      - SELECT * FROM suwar
+      - SELECT * FROM ayat
+
+  ahadeeth:
+    data:
+      - SELECT * FROM ahadeeth
+      - SELECT * FROM hadeeth_references
+
+  ahadeeth_translations:
+    accept_potentially_dangerous_queries: true
+    parameters:
+      - SELECT request.parameters() ->> 'locale' as current_locale
+    data:
+      - SELECT * FROM hadeeth_translations WHERE locale = bucket.current_locale
+      - SELECT * FROM hadeeth_reference_translations WHERE locale = bucket.current_locale

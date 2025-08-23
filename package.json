@@ -1,0 +1,57 @@
+{
+  "name": "powersync-nuxt",
+  "version": "1.0.0",
+  "description": "My new Nuxt module",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/types.d.mts",
+      "import": "./dist/module.mjs"
+    }
+  },
+  "main": "./dist/module.mjs",
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/types.d.mts"
+      ]
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "prepack": "nuxt-module-build && npm run client:build",
+    "inspector:build": "nuxi generate inspector",
+    "inspector:dev": "nuxi dev inspector --port 3300",
+    "dev": "npm run play:dev",
+    "dev:prepare": "nuxt-module-build --stub && nuxi prepare inspector",
+    "prepare": "nuxi prepare inspector",
+    "play:dev": "nuxi dev playground",
+    "play:prod": "npm run prepack && nuxi dev playground",
+    "release": "npm run lint && npm run test && npm run prepack && changelogen --release && npm publish && git push --follow-tags",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest watch"
+  },
+  "dependencies": {
+    "@nuxt/devtools-kit": "^2.6.2",
+    "@nuxt/kit": "^4.0.3",
+    "sirv": "^3.0.1"
+  },
+  "devDependencies": {
+    "@iconify-json/carbon": "^1.2.13",
+    "@nuxt/devtools": "^2.6.2",
+    "@nuxt/devtools-ui-kit": "^2.6.2",
+    "@nuxt/eslint-config": "^1.9.0",
+    "@nuxt/module-builder": "^1.0.2",
+    "@nuxt/schema": "^4.0.3",
+    "@nuxt/test-utils": "^3.19.2",
+    "changelogen": "^0.6.2",
+    "eslint": "^9.33.0",
+    "nuxt": "^4.0.3",
+    "vitest": "^3.2.4"
+  },
+  "packageManager": "pnpm@10.12.1+sha512.f0dda8580f0ee9481c5c79a1d927b9164f2c478e90992ad268bbb2465a736984391d6333d2c327913578b2804af33474ca554ba29c04a8b13060a717675ae3ac"
+}
