@@ -16,7 +16,7 @@ export class TokenConnector implements PowerSyncBackendConnector {
     this.connectFn = connectFn;
   }
 
-  async fetchCredentials() {
+  fetchCredentials() {
     const value = localStorage.getItem("powersync_credentials");
     if (value == null) {
       return null;

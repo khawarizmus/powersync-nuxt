@@ -9,8 +9,6 @@
       Powersync Inspector
     </h1>
 
-    {{ sync?.syncStatus }}
-
     <div v-if="authenticated" class="flex justify-between mb-3">
       <div class="flex gap-2">
         <NTip
@@ -98,25 +96,34 @@
       </div>
     </div>
 
-    <NTip
-      v-if="
-        authenticated &&
-        (sync?.syncStatus.dataFlowStatus.downloadError ||
-          sync?.syncStatus.dataFlowStatus.uploadError)
-      "
-      n="red sm"
-      icon="carbon:warning-hex-filled"
-    >
-      {{
-        sync?.syncStatus.dataFlowStatus.downloadError?.message ??
-        sync?.syncStatus.dataFlowStatus.uploadError?.message
-      }}
-    </NTip>
+    <div class="flex gap-4 mb-3">
+      <NTip
+        v-if="authenticated && connector?.hasCredentials()"
+        n="gray sm"
+        icon="carbon:user-admin"
+      >
+        Logged in as: {{ userID }}
+      </NTip>
+      <NTip
+        v-if="
+          authenticated &&
+          (sync?.syncStatus.dataFlowStatus.downloadError ||
+            sync?.syncStatus.dataFlowStatus.uploadError)
+        "
+        n="red sm"
+        icon="carbon:warning-hex-filled"
+      >
+        {{
+          sync?.syncStatus.dataFlowStatus.downloadError?.message ??
+          sync?.syncStatus.dataFlowStatus.uploadError?.message
+        }}
+      </NTip>
+    </div>
 
     <div v-if="authenticated" class="flex gap-2 mb-3">
       <NSelectTabs
-        n="amber6 dark:amber5 sm"
-        :model-value="selectedTab"
+        v-model="selectedTab"
+        n="amber6 dark:amber5 lg"
         :options="tabs"
       />
     </div>
@@ -127,7 +134,7 @@
 
 <script setup lang="ts">
 import { useTimeAgo } from "@vueuse/core";
-const { sync, db, clearData, signOut } = useConnectionManager();
+const { sync, db, connector, clearData, signOut } = useConnectionManager();
 
 const route = useRoute();
 const authenticated = computed(() => route.name !== "index");
@@ -139,7 +146,7 @@ if (authenticated.value && !sync.value?.syncStatus.hasSynced) {
 const selectedTab = ref("health");
 const tabs = [
   { label: "Sync Status", value: "health" },
-  { label: "Schema", value: "schema" },
+  { label: "Config Inspector", value: "config" },
 ];
 
 watch(selectedTab, (value) => {
@@ -178,4 +185,17 @@ watch(
     }
   }
 );
+
+const userID = computed(() => {
+  try {
+    const token = connector.value?.fetchCredentials()?.token;
+    if (!token) return null;
+
+    const [_head, body, _signature] = token.split(".");
+    const payload = JSON.parse(atob(body ?? ""));
+    return payload.sub;
+  } catch {
+    return null;
+  }
+});
 </script>
