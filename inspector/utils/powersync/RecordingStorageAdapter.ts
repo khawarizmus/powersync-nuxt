@@ -2,6 +2,7 @@ import type {
   Checkpoint,
   ColumnType,
   DBAdapter,
+  PowerSyncDatabase,
   SyncDataBatch,
 } from "@powersync/web";
 import { AbstractPowerSyncDatabase, SqliteBucketStorage } from "@powersync/web";
@@ -9,12 +10,23 @@ import type { DynamicSchemaManager } from "./DynamicSchemaManager";
 
 export class RecordingStorageAdapter extends SqliteBucketStorage {
   private rdb: DBAdapter;
+  private psDb: PowerSyncDatabase;
+  private schemaManager: DynamicSchemaManager;
 
   public tables: Record<string, Record<string, ColumnType>> = {};
 
-  constructor(db: DBAdapter, private schemaManager: DynamicSchemaManager) {
-    super(db, (AbstractPowerSyncDatabase as any).transactionMutex);
-    this.rdb = db;
+  constructor(
+    db: Ref<PowerSyncDatabase>,
+    schemaManager: Ref<DynamicSchemaManager>
+  ) {
+    console.log("RecordingStorageAdapter constructor", db.value);
+    super(
+      db.value.database,
+      (AbstractPowerSyncDatabase as any).transactionMutex
+    );
+    this.rdb = db.value.database;
+    this.psDb = db.value;
+    this.schemaManager = schemaManager.value;
   }
 
   override async setTargetCheckpoint(checkpoint: Checkpoint) {
@@ -50,7 +62,7 @@ export class RecordingStorageAdapter extends SqliteBucketStorage {
     // Refresh schema asynchronously, to allow us to better measure
     // performance of initial sync.
     setTimeout(() => {
-      this.schemaManager.refreshSchema(this.rdb);
+      this.schemaManager.value.refreshSchema(this.rdb);
     }, 60);
     if (r.checkpointValid) {
       await this.rdb.execute(

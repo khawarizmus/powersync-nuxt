@@ -4,6 +4,13 @@
       <NCard class="flex flex-col gap-4 p-4">
         <h1 class="text-2xl font-bold mb-2">Connection details</h1>
 
+        <NTip
+          v-if="sync?.syncStatus.dataFlowStatus.downloadError"
+          n="red sm"
+          icon="carbon:warning-hex-filled"
+        >
+          {{ getError(sync?.syncStatus.dataFlowStatus.downloadError) }}
+        </NTip>
         <NTextInput
           v-model="token"
           n="purple"
@@ -48,12 +55,12 @@
 </template>
 
 <script setup lang="ts">
-import { connector } from "@/utils/powersync/ConnectionManager";
-
 const endpoint = ref("");
 const token = ref("");
 const errors = ref<string[]>([]);
 const error = ref<boolean>(false);
+
+const { connector, sync } = useConnectionManager();
 
 watch(token, (newToken) => {
   endpoint.value =
@@ -79,7 +86,7 @@ async function inspect() {
   }
 
   // connect to PowerSync
-  await connector.signIn({
+  await connector.value!.signIn({
     token: token.value,
     endpoint: endpoint.value,
   });
@@ -112,5 +119,20 @@ function getTokenEndpoint(token: string): string | null {
   } catch {
     return null;
   }
+}
+
+const errorsMap = new Map<string, string>([
+  [
+    "Disconnect has been requested",
+    "This token has been disconnected before. Please use a different token.",
+  ],
+  [
+    `Closed. Original cause [Error: [PSYNC_S2101] Authorization failed "exp" claim timestamp check failed].`,
+    "The token has expired. Please use a different token.",
+  ],
+]);
+
+function getError(error: Error): string {
+  return errorsMap.get(error.message) ?? error.message;
 }
 </script>

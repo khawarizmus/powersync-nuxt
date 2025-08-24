@@ -2,7 +2,6 @@ import type {
   AbstractPowerSyncDatabase,
   PowerSyncBackendConnector,
 } from "@powersync/web";
-import { connect } from "./ConnectionManager";
 
 export interface Credentials {
   token: string;
@@ -10,6 +9,13 @@ export interface Credentials {
 }
 
 export class TokenConnector implements PowerSyncBackendConnector {
+  private connectFn?: () => Promise<void>;
+
+  // Inject the connect function to avoid circular dependency
+  setConnectFunction(connectFn: () => Promise<void>) {
+    this.connectFn = connectFn;
+  }
+
   async fetchCredentials() {
     const value = localStorage.getItem("powersync_credentials");
     if (value == null) {
@@ -25,21 +31,17 @@ export class TokenConnector implements PowerSyncBackendConnector {
   }
 
   async signIn(credentials: Credentials) {
-    console.log("signIn", credentials);
     validateSecureContext(credentials.endpoint);
     checkJWT(credentials.token);
-    console.log("all good");
+
     try {
-      console.log("setting credentials");
       localStorage.setItem(
         "powersync_credentials",
         JSON.stringify(credentials)
       );
-      console.log("connecting");
-      await connect();
-      console.log("connected");
+
+      await this.connectFn!();
     } catch (e) {
-      console.error("error", e);
       this.clearCredentials();
       throw e;
     }
