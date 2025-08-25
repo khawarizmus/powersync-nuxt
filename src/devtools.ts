@@ -8,6 +8,11 @@ const DEVTOOLS_UI_ROUTE = "/__powersync-inspector";
 const DEVTOOLS_UI_LOCAL_PORT = 3300;
 
 export function setupDevToolsUI(nuxt: Nuxt, resolver: Resolver) {
+  // const prodClientPath = resolver.resolve("../dist/inspector");
+  // const devClientPath = resolver.resolve("./inspector");
+  // const isProductionBuild = existsSync(prodClientPath);
+  // const clientPath = isProductionBuild ? prodClientPath : devClientPath;
+
   const clientPath = resolver.resolve("./inspector");
   const isProductionBuild = existsSync(clientPath);
 

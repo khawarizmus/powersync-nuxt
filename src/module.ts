@@ -1,22 +1,20 @@
-import { defineNuxtModule, addPlugin, createResolver } from "@nuxt/kit";
+import {
+  defineNuxtModule,
+  createResolver,
+  addPlugin,
+  addImports,
+} from "@nuxt/kit";
 import { setupDevToolsUI } from "./devtools";
-import type { NitroFetchOptions } from "nitropack";
+import { defu } from "defu";
 
 // Module options TypeScript interface definition
 export interface PowersyncModuleOptions {
   /**
-   * Enable Nuxt Devtools integration
+   * default powersync connection params
    *
-   * @default true
+   * @default "undefined"
    */
-  inspector: boolean;
-
-  /**
-   * The URL of the Powersync server
-   *
-   * @default "http://localhost:3000" // TODO: add a sensible default
-   */
-  powersyncKeysEndpoint?: string | NitroFetchOptions<string, "get" | "post">;
+  defaultConnectionParams?: undefined | Record<string, unknown>;
 }
 
 export default defineNuxtModule<PowersyncModuleOptions>({
@@ -26,14 +24,27 @@ export default defineNuxtModule<PowersyncModuleOptions>({
   },
   // Default configuration options of the Nuxt module
   defaults: {
-    inspector: true,
+    defaultConnectionParams: undefined,
   },
   setup(options, nuxt) {
     const resolver = createResolver(import.meta.url);
 
-    // Do not add the extension since the `.ts` will be transpiled to `.mjs` after `npm run prepack`
+    nuxt.options.runtimeConfig.public.powersyncOptions = defu(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      nuxt.options.runtimeConfig.public.powersyncOptions as any,
+      {
+        defaultConnectionParams: options.defaultConnectionParams,
+      }
+    );
+
+    // Add the plugin to expose options
     addPlugin(resolver.resolve("./runtime/plugin.client"));
 
-    if (options.inspector) setupDevToolsUI(nuxt, resolver);
+    addImports({
+      name: "usePowerSyncDevtools",
+      from: resolver.resolve("./runtime/composables/usePowerSyncDevtools"),
+    });
+
+    setupDevToolsUI(nuxt, resolver);
   },
 });

@@ -3,7 +3,7 @@ export default defineNuxtConfig({
     enabled: true,
   },
 
-  watch: ["../src/module/*", "../inspector/*"],
+  watch: ["../src/*", "../inspector/*"],
 
   modules: ["../src/module"],
 

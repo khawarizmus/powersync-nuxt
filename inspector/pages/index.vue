@@ -1,138 +1,177 @@
 <template>
-  <div class="flex h-full justify-center items-center">
-    <div class="flex flex-col gap-4 w-full max-w-md">
-      <NCard class="flex flex-col gap-4 p-4">
-        <h1 class="text-2xl font-bold mb-2">Connection details</h1>
+  <div class="relative n-bg-base flex flex-col h-screen">
+    <div v-if="client" class="flex flex-col gap-2">
+      <NSectionBlock icon="carbon:data-share" text="Data Flow">
+        <div class="grid grid-cols-6 gap-4 mb-4">
+          <!-- Download Progress -->
+          <div class="flex flex-col gap-2">
+            <span class="text-sm text-gray-500">Download Progress</span>
+            <div class="flex items-center gap-2">
+              <template
+                v-if="syncStatus?.dataFlowStatus.downloadProgress !== null"
+              >
+                <div class="flex-1 bg-gray-200 rounded-full h-2">
+                  <div
+                    class="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                    :style="{
+                      width: `${totalDownloadProgress}%`,
+                    }"
+                  ></div>
+                </div>
+                <span class="text-sm font-medium"
+                  >{{ totalDownloadProgress }}%</span
+                >
+              </template>
+              <template v-else>
+                <span class="text-sm text-gray-400">No active download</span>
+              </template>
+            </div>
+          </div>
 
-        <NTip
-          v-if="sync?.syncStatus.dataFlowStatus.downloadError"
-          n="red sm"
-          icon="carbon:warning-hex-filled"
-        >
-          {{ getError(sync?.syncStatus.dataFlowStatus.downloadError) }}
-        </NTip>
-        <NTextInput
-          v-model="token"
-          n="purple"
-          icon="carbon:code-signing-service"
-          placeholder="PowerSync token"
-          class="w-full"
-          name="token"
-          type="text"
-          autocomplete="token"
-        />
-        <NTextInput
-          v-model="endpoint"
-          n="purple"
-          icon="carbon:api-1"
-          placeholder="PowerSync endpoint"
-          class="w-full"
-          name="endpoint"
-          type="url"
-          autocomplete="url"
-        />
-        <div class="flex justify-end">
-          <NButton n="green solid" @click="inspect">Inspect</NButton>
+          <!-- Error Indicator -->
+          <div class="flex flex-col gap-2">
+            <span class="text-sm text-gray-500">Status</span>
+            <NBadge
+              :n="syncStatus?.dataFlowStatus.downloadError ? 'red' : 'green'"
+              :icon="
+                syncStatus?.dataFlowStatus.downloadError
+                  ? 'carbon:warning-filled'
+                  : 'carbon:checkmark-filled'
+              "
+            >
+              {{
+                syncStatus?.dataFlowStatus.downloadError ? "Error" : "Healthy"
+              }}
+            </NBadge>
+          </div>
+
+          <!-- Error Details -->
+          <div class="flex flex-col gap-2 col-span-4">
+            <span class="text-sm text-gray-500">Error Message</span>
+            <NBadge
+              v-if="syncStatus?.dataFlowStatus.downloadError"
+              n="red sm"
+              icon="carbon:warning-filled"
+            >
+              {{ syncStatus?.dataFlowStatus.downloadError.message }}
+            </NBadge>
+            <NBadge v-else n="slate sm" icon="carbon:checkmark-filled">
+              N/A
+            </NBadge>
+          </div>
         </div>
 
-        <NTip v-if="error" n="red" icon="carbon:warning-filled">
-          <p v-for="e in errors" :key="e">{{ e }}</p>
-        </NTip>
-      </NCard>
-      <NTip n="green" icon="carbon:information">
-        <p>
-          PowerSync token is a unique identifier that allows you to connect to
-          your PowerSync instance. Learn more about tokens
-          <NLink
-            href="https://docs.powersync.com/installation/authentication-setup"
-            target="_blank"
-            >here</NLink
-          >.
-        </p>
+        <div class="grid grid-cols-6 gap-4 mb-4">
+          <!-- Upload Progress -->
+          <div class="flex flex-col gap-2">
+            <span class="text-sm text-gray-500">Upload Progress</span>
+            <div class="flex items-center gap-2">
+              <span v-if="syncStatus?.dataFlowStatus.uploading"
+                >upload in progress...</span
+              >
+              <span v-else class="text-sm text-gray-400">No active upload</span>
+            </div>
+          </div>
+
+          <!-- Error Indicator -->
+          <div class="flex flex-col gap-2">
+            <span class="text-sm text-gray-500">Status</span>
+            <NBadge
+              :n="syncStatus?.dataFlowStatus.uploadError ? 'red' : 'green'"
+              :icon="
+                syncStatus?.dataFlowStatus.uploadError
+                  ? 'carbon:warning-filled'
+                  : 'carbon:checkmark-filled'
+              "
+            >
+              {{ syncStatus?.dataFlowStatus.uploadError ? "Error" : "Healthy" }}
+            </NBadge>
+          </div>
+
+          <!-- Error Details -->
+          <div class="flex flex-col gap-2 col-span-4">
+            <span class="text-sm text-gray-500">Error Message</span>
+            <NBadge
+              v-if="syncStatus?.dataFlowStatus.uploadError"
+              n="red sm"
+              icon="carbon:warning-filled"
+            >
+              {{ syncStatus?.dataFlowStatus.uploadError.message }}
+            </NBadge>
+            <NBadge v-else n="slate sm" icon="carbon:checkmark-filled">
+              N/A
+            </NBadge>
+          </div>
+        </div>
+      </NSectionBlock>
+
+      <NSectionBlock icon="carbon:data-volume" text="Data Size">
+        <div class="grid grid-cols-5 gap-4 mb-4">
+          <div class="flex flex-col gap-2">
+            <span class="text-sm text-gray-500">Buckets Synced</span>
+            <span class="text-sm"> {{ totals.buckets }} </span>
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <span class="text-sm text-gray-500">Rows Synced</span>
+            <span class="text-sm"> {{ totals.row_count }} </span>
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <span class="text-sm text-gray-500">Data size</span>
+            <span class="text-sm">
+              {{ totals.data_size }}
+            </span>
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <span class="text-sm text-gray-500">Metadata size</span>
+            <span class="text-sm">
+              {{ totals.metadata_size }}
+            </span>
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <span class="text-sm text-gray-500">Database Size</span>
+            <span class="text-sm">
+              {{ totals.download_size }}
+            </span>
+          </div>
+        </div>
+      </NSectionBlock>
+
+      <NSectionBlock icon="carbon:data-share" text="Operations">
+        <div class="grid grid-cols-2 gap-4 mb-4">
+          <div class="flex flex-col gap-2">
+            <span class="text-sm text-gray-500">Total operations</span>
+            <span class="text-sm">
+              {{ totals.total_operations }}
+            </span>
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <span class="text-sm text-gray-500">Downloaded operations</span>
+            <span class="text-sm">
+              {{ totals.downloaded_operations }}
+            </span>
+          </div>
+        </div>
+      </NSectionBlock>
+    </div>
+    <div v-else>
+      <NTip n="yellow">
+        Failed to connect to the client. Did you open this page inside Nuxt
+        DevTools?
       </NTip>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-const endpoint = ref("");
-const token = ref("");
-const errors = ref<string[]>([]);
-const error = ref<boolean>(false);
+import { useDevtoolsClient } from "@nuxt/devtools-kit/iframe-client";
 
-const { connector, sync } = useConnectionManager();
+const { syncStatus, totals, totalDownloadProgress } =
+  usePowerSyncAppDiagnostics();
 
-watch(token, (newToken) => {
-  endpoint.value =
-    endpoint.value === ""
-      ? getTokenEndpoint(newToken ?? "") ?? ""
-      : endpoint.value;
-});
-
-async function inspect() {
-  errors.value = [];
-  error.value = false;
-
-  if (!token.value) {
-    errors.value.push("Token is required");
-    error.value = true;
-    return;
-  }
-
-  if (!endpoint.value) {
-    errors.value.push("Endpoint is required");
-    error.value = true;
-    return;
-  }
-
-  // connect to PowerSync
-  await connector.value!.signIn({
-    token: token.value,
-    endpoint: endpoint.value,
-  });
-
-  navigateTo("/health");
-}
-
-function getTokenEndpoint(token: string): string | null {
-  try {
-    const [_head, body, _signature] = token.split(".");
-    const payload = JSON.parse(atob(body ?? ""));
-    const aud = payload.aud as string | string[] | undefined;
-    const audiences = Array.isArray(aud) ? aud : [aud];
-
-    // Prioritize public powersync URL
-    for (const aud of audiences) {
-      if (aud?.match(/^https?:.*\.journeyapps\.com/)) {
-        return aud;
-      }
-    }
-
-    // Fallback to any URL
-    for (const aud of audiences) {
-      if (aud?.match(/^https?:/)) {
-        return aud;
-      }
-    }
-
-    return null;
-  } catch {
-    return null;
-  }
-}
-
-const errorsMap = new Map<string, string>([
-  [
-    "Disconnect has been requested",
-    "This token has been disconnected before. Please use a different token.",
-  ],
-  [
-    `Closed. Original cause [Error: [PSYNC_S2101] Authorization failed "exp" claim timestamp check failed].`,
-    "The token has expired. Please use a different token.",
-  ],
-]);
-
-function getError(error: Error): string {
-  return errorsMap.get(error.message) ?? error.message;
-}
+const client = useDevtoolsClient();
 </script>

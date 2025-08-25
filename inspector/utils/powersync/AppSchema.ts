@@ -18,10 +18,10 @@ export const local_schema = new Table(
   { localOnly: true }
 );
 
-export const AppSchema = new Schema({
+export const DiagnosticsAppSchema = new Schema({
   local_bucket_data,
   local_schema,
 });
 
-export type Database = (typeof AppSchema)["types"];
+export type Database = (typeof DiagnosticsAppSchema)["types"];
 export type LocalBucketData = Database["local_bucket_data"];

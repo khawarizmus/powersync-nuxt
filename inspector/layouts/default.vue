@@ -9,84 +9,75 @@
       Powersync Inspector
     </h1>
 
-    <div v-if="authenticated" class="flex justify-between mb-3">
+    <div class="flex justify-between mb-3">
       <div class="flex gap-2">
         <NTip
-          :n="`${
-            sync?.syncStatus.connected
-              ? 'green'
-              : sync?.syncStatus.connecting
-              ? 'blue'
-              : 'red'
-          } sm`"
+          :n="`${isConnected ? 'green' : isSyncing ? 'blue' : 'red'} sm`"
           :icon="`${
-            sync?.syncStatus.connected
+            isConnected
               ? 'carbon:plug-filled'
-              : sync?.syncStatus.connecting
+              : isSyncing
               ? 'carbon:plug'
               : 'carbon:connection-signal-off'
           }`"
         >
           Powersync is
           {{
-            sync?.syncStatus.connected
+            isConnected
               ? "connected"
-              : sync?.syncStatus.connecting
+              : isSyncing
               ? "connecting..."
               : "disconnected"
           }}
         </NTip>
         <NTip
-          :n="`${syncing ? 'blue' : hasSynced ? 'green' : 'yellow'} sm`"
+          :n="`${isSyncing ? 'blue' : hasSynced ? 'green' : 'yellow'} sm`"
           :icon="`${
-            syncing
+            isSyncing
               ? 'carbon:data-unreal'
               : hasSynced
               ? 'carbon:checkmark-filled'
               : 'carbon:async'
           }`"
         >
-          {{ syncing ? "Syncing" : hasSynced ? "Synced" : "Not Synced" }}
+          {{ isSyncing ? "Syncing" : hasSynced ? "Synced" : "Not Synced" }}
         </NTip>
         <NTip
           :n="
-            getFlowStatusColor(
-              sync?.syncStatus.dataFlowStatus.uploading ?? false
-            ) + ' sm'
+            getFlowStatusColor(syncStatus?.dataFlowStatus.uploading ?? false) +
+            ' sm'
           "
           :icon="
-            sync?.syncStatus.dataFlowStatus.uploading
+            syncStatus?.dataFlowStatus.uploading
               ? 'carbon:cloud-upload'
               : 'carbon:pause-outline'
           "
         >
           {{
-            sync?.syncStatus.dataFlowStatus.uploading
-              ? "Uploading"
-              : "Upload Idle"
+            syncStatus?.dataFlowStatus.uploading ? "Uploading" : "Upload Idle"
           }}
         </NTip>
         <NTip
           :n="
             getFlowStatusColor(
-              sync?.syncStatus.dataFlowStatus.downloading ?? false
+              syncStatus?.dataFlowStatus.downloading ?? false
             ) + ' sm'
           "
           :icon="
-            sync?.syncStatus.dataFlowStatus.downloading
+            syncStatus?.dataFlowStatus.downloading
               ? 'carbon:cloud-download'
               : 'carbon:pause-outline'
           "
         >
           {{
-            sync?.syncStatus.dataFlowStatus.downloading
+            syncStatus?.dataFlowStatus.downloading
               ? "Downloading"
               : "Download Idle"
           }}
         </NTip>
         <NBadge class="flex items-center gap-2" icon="carbon:server-time">
           Last Synced:
-          {{ useTimeAgo(new Date(sync!.syncStatus.lastSyncedAt ?? "")) }}
+          {{ useTimeAgo(new Date(lastSyncedAt ?? "")) }}
         </NBadge>
       </div>
 
@@ -98,7 +89,7 @@
 
     <div class="flex gap-4 mb-3">
       <NTip
-        v-if="authenticated && connector?.hasCredentials()"
+        v-if="connector?.hasCredentials()"
         n="gray sm"
         icon="carbon:user-admin"
       >
@@ -107,15 +98,15 @@
       <NTip
         v-if="
           authenticated &&
-          (sync?.syncStatus.dataFlowStatus.downloadError ||
-            sync?.syncStatus.dataFlowStatus.uploadError)
+          (syncStatus?.dataFlowStatus.downloadError ||
+            syncStatus?.dataFlowStatus.uploadError)
         "
         n="red sm"
         icon="carbon:warning-hex-filled"
       >
         {{
-          sync?.syncStatus.dataFlowStatus.downloadError?.message ??
-          sync?.syncStatus.dataFlowStatus.uploadError?.message
+          syncStatus?.dataFlowStatus.downloadError?.message ??
+          syncStatus?.dataFlowStatus.uploadError?.message
         }}
       </NTip>
     </div>
@@ -134,14 +125,15 @@
 
 <script setup lang="ts">
 import { useTimeAgo } from "@vueuse/core";
-const { sync, db, connector, clearData, signOut } = useConnectionManager();
+
+const { connector, clearData, signOut } = useConnectionManager();
+const { syncStatus, isConnected, hasSynced, db, isSyncing, lastSyncedAt } =
+  usePowerSyncAppDiagnostics();
 
 const route = useRoute();
 const authenticated = computed(() => route.name !== "index");
 
-if (authenticated.value && !sync.value?.syncStatus.hasSynced) {
-  await db.value!.waitForFirstSync();
-}
+await db.value!.waitForFirstSync();
 
 const selectedTab = ref("health");
 const tabs = [
@@ -159,32 +151,6 @@ async function logout() {
   await signOut();
   navigateTo("/");
 }
-const hasSynced = ref(false);
-const syncing = ref(false);
-
-watch(
-  () => sync.value?.syncStatus,
-  (value) => {
-    if (value?.hasSynced) {
-      hasSynced.value = true;
-    }
-
-    if (value?.dataFlowStatus.downloading || value?.dataFlowStatus.uploading) {
-      syncing.value = true;
-    } else {
-      syncing.value = false;
-    }
-
-    if (
-      value?.hasSynced === undefined ||
-      (value?.priorityStatusEntries?.length &&
-        value.priorityStatusEntries.length > 0)
-    ) {
-      hasSynced.value =
-        value?.priorityStatusEntries.every((entry) => entry.hasSynced) ?? false;
-    }
-  }
-);
 
 const userID = computed(() => {
   try {

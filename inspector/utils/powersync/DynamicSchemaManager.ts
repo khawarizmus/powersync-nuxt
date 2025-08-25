@@ -1,6 +1,6 @@
 import type { DBAdapter, SyncDataBatch } from "@powersync/web";
 import { Column, ColumnType, OpTypeEnum, Schema, Table } from "@powersync/web";
-import { AppSchema } from "./AppSchema";
+import { DiagnosticsAppSchema as AppSchema } from "./AppSchema";
 import { JsSchemaGenerator } from "./JsSchemaGenerator";
 
 /**
@@ -34,30 +34,32 @@ export class DynamicSchemaManager {
             if (key == "id") {
               continue;
             }
-            const existing = table[key];
-            if (
-              typeof value == "number" &&
-              Number.isInteger(value) &&
-              existing != ColumnType.REAL &&
-              existing != ColumnType.TEXT
-            ) {
-              if (table[key] != ColumnType.INTEGER) {
-                schemaDirty = true;
+            if (table) {
+              const existing = table[key];
+              if (
+                typeof value == "number" &&
+                Number.isInteger(value) &&
+                existing != ColumnType.REAL &&
+                existing != ColumnType.TEXT
+              ) {
+                if (table[key] != ColumnType.INTEGER) {
+                  schemaDirty = true;
+                }
+                table[key] = ColumnType.INTEGER;
+              } else if (
+                typeof value == "number" &&
+                existing != ColumnType.TEXT
+              ) {
+                if (table[key] != ColumnType.REAL) {
+                  schemaDirty = true;
+                }
+                table[key] = ColumnType.REAL;
+              } else if (typeof value == "string") {
+                if (table[key] != ColumnType.TEXT) {
+                  schemaDirty = true;
+                }
+                table[key] = ColumnType.TEXT;
               }
-              table[key] = ColumnType.INTEGER;
-            } else if (
-              typeof value == "number" &&
-              existing != ColumnType.TEXT
-            ) {
-              if (table[key] != ColumnType.REAL) {
-                schemaDirty = true;
-              }
-              table[key] = ColumnType.REAL;
-            } else if (typeof value == "string") {
-              if (table[key] != ColumnType.TEXT) {
-                schemaDirty = true;
-              }
-              table[key] = ColumnType.TEXT;
             }
           }
         }

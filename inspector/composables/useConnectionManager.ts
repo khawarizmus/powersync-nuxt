@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { SyncStatus } from "@powersync/web";
 import {
   createBaseLogger,
@@ -10,7 +9,6 @@ import {
   PowerSyncDatabase,
   WebRemote,
 } from "@powersync/web";
-
 import { DynamicSchemaManager } from "../utils/powersync/DynamicSchemaManager";
 import { RecordingStorageAdapter } from "../utils/powersync/RecordingStorageAdapter";
 import { TokenConnector } from "../utils/powersync/TokenConnector";
@@ -97,7 +95,7 @@ async function clearData() {
   await sync?.value?.disconnect();
   await db.value?.disconnectAndClear();
   await schemaManager.value?.clear();
-  await schemaManager.value?.refreshSchema(db.value?.database);
+  await schemaManager.value?.refreshSchema(db.value!.database);
   if (connector.value?.hasCredentials()) {
     const params = getParams();
     await sync.value?.connect({ params });

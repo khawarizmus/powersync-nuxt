@@ -22,6 +22,7 @@ export class RecordingStorageAdapter extends SqliteBucketStorage {
     console.log("RecordingStorageAdapter constructor", db.value);
     super(
       db.value.database,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (AbstractPowerSyncDatabase as any).transactionMutex
     );
     this.rdb = db.value.database;
@@ -62,7 +63,7 @@ export class RecordingStorageAdapter extends SqliteBucketStorage {
     // Refresh schema asynchronously, to allow us to better measure
     // performance of initial sync.
     setTimeout(() => {
-      this.schemaManager.value.refreshSchema(this.rdb);
+      this.schemaManager.refreshSchema(this.rdb);
     }, 60);
     if (r.checkpointValid) {
       await this.rdb.execute(
