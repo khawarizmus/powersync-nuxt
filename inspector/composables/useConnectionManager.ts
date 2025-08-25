@@ -9,9 +9,9 @@ import {
   PowerSyncDatabase,
   WebRemote,
 } from "@powersync/web";
-import { DynamicSchemaManager } from "../utils/powersync/DynamicSchemaManager";
-import { RecordingStorageAdapter } from "../utils/powersync/RecordingStorageAdapter";
-import { TokenConnector } from "../utils/powersync/TokenConnector";
+import { DynamicSchemaManager } from "../../src/runtime/utils/DynamicSchemaManager";
+import { RecordingStorageAdapter } from "../../src/runtime/utils/RecordingStorageAdapter";
+import { TokenConnector } from "../../src/runtime/utils/TokenConnector";
 
 type JSONValue =
   | string

@@ -2,18 +2,15 @@ import { useDevtoolsClient } from "@nuxt/devtools-kit/iframe-client";
 import type {
   PowerSyncBackendConnector,
   PowerSyncDatabase,
+  SyncStatus,
 } from "@powersync/web";
 import { WebStreamingSyncImplementation, WebRemote } from "@powersync/web";
-import { DynamicSchemaManager } from "../utils/powersync/DynamicSchemaManager";
-import { RecordingStorageAdapter } from "../utils/powersync/RecordingStorageAdapter";
+import { DynamicSchemaManager } from "../../src/runtime/utils/DynamicSchemaManager";
+import { RecordingStorageAdapter } from "../../src/runtime/utils/RecordingStorageAdapter";
+import type { PowerSyncModuleOptions } from "../../src/module";
 
 type AbstractPowerSyncBackendConnector =
   PowerSyncBackendConnector extends infer T ? T : never;
-
-interface PowerSync<T = AbstractPowerSyncBackendConnector> {
-  db: PowerSyncDatabase;
-  connector: T;
-}
 
 type JSONValue =
   | string
@@ -27,6 +24,13 @@ interface JSONObject {
   [key: string]: JSONValue;
 }
 type JSONArray = JSONValue[];
+
+// Add interface for the reactive state
+interface PowerSyncReactiveState {
+  syncStatus: SyncStatus;
+  connected: boolean;
+  dataChanged: number;
+}
 
 const BUCKETS_QUERY = `
 WITH
@@ -108,31 +112,71 @@ function formatBytes(bytes: number, decimals = 2) {
 export function usePowerSyncAppDiagnostics() {
   const devtoolsClient = useDevtoolsClient();
 
-  const powerSync = computed<PowerSync | null>(() => {
-    return devtoolsClient.value?.host?.nuxt.vueApp.config.globalProperties
-      ?.$powerSync as PowerSync;
-  });
-  const params = computed<Record<string, JSONValue> | undefined>(() => {
-    return devtoolsClient.value?.host?.nuxt.vueApp.config.globalProperties
-      ?.$powersyncOptions?.defaultConnectionParams;
+  const moduleOptions = computed<PowerSyncModuleOptions | undefined>(() => {
+    const moduleOptions =
+      devtoolsClient.value?.host?.nuxt.vueApp.config.globalProperties
+        ?.$powerSyncModuleOptions;
+
+    return moduleOptions as PowerSyncModuleOptions | undefined;
   });
 
-  const db = computed(() => powerSync.value?.db);
-  const connector = computed(() => powerSync.value?.connector);
-  const syncStatus = computed(() => db.value?.currentStatus);
-  const isConnected = computed(() => db.value?.connected);
+  // Fix the type access - you're storing refs, so access the .value
+  const db = computed<PowerSyncDatabase | null>(() => {
+    const dbRef = devtoolsClient.value?.host?.nuxt.vueApp.config
+      .globalProperties?.$inspectorPowerSyncDatabase as
+      | Ref<PowerSyncDatabase>
+      | undefined;
+    return dbRef?.value ?? null;
+  });
+
+  const connector = computed<AbstractPowerSyncBackendConnector | null>(() => {
+    const connectorRef = devtoolsClient.value?.host?.nuxt.vueApp.config
+      .globalProperties?.$inspectorPowerSyncConnector as
+      | Ref<AbstractPowerSyncBackendConnector>
+      | undefined;
+    return connectorRef?.value ?? null;
+  });
+  // const syncStatus = computed(() => db.value?.currentStatus);
+  // const isConnected = computed(() => db.value?.connected);
+
+  const reactiveState = computed<Ref<PowerSyncReactiveState> | null>(() => {
+    return (
+      devtoolsClient.value?.host?.nuxt.vueApp.config.globalProperties
+        ?.$inspectorReactiveState ?? null
+    );
+  });
+
+  const syncStatus = computed(() => reactiveState.value?.value?.syncStatus);
+  const isConnected = computed(
+    () => reactiveState.value?.value?.connected ?? false
+  );
+
+  // Watch for data changes and refresh accordingly
+  watch(
+    () => reactiveState.value?.value.dataChanged,
+    async () => {
+      if (db.value) {
+        await refreshState();
+      }
+    }
+  );
 
   // Set up diagnostics automatically
   const diagnosticsSync = ref<WebStreamingSyncImplementation | null>(null);
   const adapter = ref<RecordingStorageAdapter | null>(null);
+  const schemaManager = new DynamicSchemaManager();
 
+  db.value?.registerListener({
+    statusChanged(status) {
+      console.log("devtools Status changed:", status);
+    },
+  });
   watch(
-    [db, connector, params],
-    ([dbValue, connectorValue, paramsValue]) => {
+    [db, connector, moduleOptions],
+    ([dbValue, connectorValue, moduleOptionsValue]) => {
       if (dbValue && connectorValue && !adapter.value) {
         console.log("Setting up PowerSync diagnostics...");
 
-        const schemaManager = new DynamicSchemaManager();
         adapter.value = new RecordingStorageAdapter(
           ref(dbValue),
           ref(schemaManager)
@@ -158,9 +202,12 @@ export function usePowerSyncAppDiagnostics() {
               !diagnosticsSync.value.syncStatus.connected
             ) {
               // Get the current connection params from the main app
-              diagnosticsSync.value
-                .connect({ params: paramsValue })
-                .catch(console.error);
+              // diagnosticsSync.value
+              //   .connect({
+              //     params:
+              //       moduleOptionsValue?.defaultConnectionParams ?? undefined,
+              //   })
+              //   .catch(console.error);
             }
           },
           { immediate: true }
@@ -200,6 +247,12 @@ export function usePowerSyncAppDiagnostics() {
         bucketRows.value = await db.value.getAll(BUCKETS_QUERY_FAST);
         tableRows.value = null;
       }
+
+      console.log("bucketRows", bucketRows.value?.[0]);
+      console.log(
+        "download_size",
+        bucketRows.value?.reduce((total, row) => total + row.download_size, 0)
+      );
     }
   }
 
@@ -283,8 +336,19 @@ export function usePowerSyncAppDiagnostics() {
     return 100;
   });
 
+  async function clearData() {
+    await diagnosticsSync.value?.disconnect();
+    await db.value?.disconnectAndClear();
+    await schemaManager.clear();
+    await schemaManager.refreshSchema(db.value!.database);
+    // await diagnosticsSync.value?.connect({
+    //   params: moduleOptions.value?.defaultConnectionParams ?? undefined,
+    // });
+  }
+
   return {
     db: readonly(db),
+    diagnosticsSync: readonly(diagnosticsSync),
     connector: readonly(connector),
     syncStatus: readonly(syncStatus),
     isConnected: readonly(isConnected),
@@ -295,5 +359,6 @@ export function usePowerSyncAppDiagnostics() {
     lastSyncedAt: readonly(lastSyncedAt),
     totals: readonly(totals),
     totalDownloadProgress: readonly(totalDownloadProgress),
+    clearData,
   };
 }

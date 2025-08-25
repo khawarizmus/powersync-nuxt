@@ -40,6 +40,7 @@
     "@journeyapps/wa-sqlite": "^1.2.6",
     "@nuxt/devtools-kit": "^2.6.2",
     "@nuxt/kit": "^4.0.3",
+    "@nuxt/devtools-ui-kit": "^2.6.2",
     "@powersync/vue": "^0.4.0",
     "@powersync/web": "^1.25.1",
     "defu": "^6.1.4",
@@ -52,7 +53,6 @@
   "devDependencies": {
     "@iconify-json/carbon": "^1.2.13",
     "@nuxt/devtools": "^2.6.2",
-    "@nuxt/devtools-ui-kit": "^2.6.2",
     "@nuxt/eslint-config": "^1.9.0",
     "@nuxt/module-builder": "^1.0.2",
     "@nuxt/schema": "^4.0.3",

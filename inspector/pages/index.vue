@@ -132,7 +132,7 @@
           </div>
 
           <div class="flex flex-col gap-2">
-            <span class="text-sm text-gray-500">Database Size</span>
+            <span class="text-sm text-gray-500">Download size</span>
             <span class="text-sm">
               {{ totals.download_size }}
             </span>

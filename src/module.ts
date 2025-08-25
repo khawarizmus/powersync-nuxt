@@ -1,23 +1,43 @@
+// import { fileURLToPath } from "node:url";
 import {
   defineNuxtModule,
   createResolver,
   addPlugin,
   addImports,
+  extendPages,
+  installModule,
 } from "@nuxt/kit";
-import { setupDevToolsUI } from "./devtools";
 import { defu } from "defu";
+import { setupDevToolsUI } from "./devtools";
+
+// function rPath(p: string) {
+//   return fileURLToPath(new URL(p, import.meta.url).toString());
+// }
+
+type JSONValue =
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+  | JSONObject
+  | JSONArray;
+interface JSONObject {
+  [key: string]: JSONValue;
+}
+type JSONArray = JSONValue[];
 
 // Module options TypeScript interface definition
-export interface PowersyncModuleOptions {
+export interface PowerSyncModuleOptions {
   /**
    * default powersync connection params
    *
    * @default "undefined"
    */
-  defaultConnectionParams?: undefined | Record<string, unknown>;
+  defaultConnectionParams?: undefined | Record<string, JSONValue>;
 }
 
-export default defineNuxtModule<PowersyncModuleOptions>({
+export default defineNuxtModule<PowerSyncModuleOptions>({
   meta: {
     name: "powersync-nuxt",
     configKey: "powersync",
@@ -26,25 +46,50 @@ export default defineNuxtModule<PowersyncModuleOptions>({
   defaults: {
     defaultConnectionParams: undefined,
   },
-  setup(options, nuxt) {
+  async setup(options, nuxt) {
     const resolver = createResolver(import.meta.url);
 
-    nuxt.options.runtimeConfig.public.powersyncOptions = defu(
+    nuxt.options.runtimeConfig.public.powerSyncModuleOptions = defu(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      nuxt.options.runtimeConfig.public.powersyncOptions as any,
+      nuxt.options.runtimeConfig.public.powerSyncModuleOptions as any,
       {
         defaultConnectionParams: options.defaultConnectionParams,
       }
     );
 
-    // Add the plugin to expose options
+    await installModule("@nuxt/devtools-ui-kit");
+
     addPlugin(resolver.resolve("./runtime/plugin.client"));
 
+    // expose the composables
     addImports({
-      name: "usePowerSyncDevtools",
-      from: resolver.resolve("./runtime/composables/usePowerSyncDevtools"),
+      name: "PowerSyncDatabaseWithDiagnostics",
+      from: resolver.resolve(
+        "./runtime/composables/PowerSyncDatabaseWithDiagnostics"
+      ),
     });
 
-    setupDevToolsUI(nuxt, resolver);
+    addImports({
+      name: "usePowerSyncInspector",
+      from: resolver.resolve("./runtime/composables/usePowerSyncInspector"),
+    });
+
+    addImports({
+      name: "usePowerSyncInspectorDiagnostics",
+      from: resolver.resolve(
+        "./runtime/composables/usePowerSyncInspectorDiagnostics"
+      ),
+    });
+
+    extendPages((pages) => {
+      pages.push({
+        path: "/__powersync-inspector",
+        // file: resolver.resolve("#build/pages/__powersync-inspector.vue"),
+        file: resolver.resolve("./runtime/pages/__powersync-inspector.vue"),
+        name: "Powersync Inspector",
+      });
+    });
+
+    setupDevToolsUI(nuxt);
   },
 });

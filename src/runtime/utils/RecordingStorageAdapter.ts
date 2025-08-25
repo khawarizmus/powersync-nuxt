@@ -10,7 +10,6 @@ import type { DynamicSchemaManager } from "./DynamicSchemaManager";
 
 export class RecordingStorageAdapter extends SqliteBucketStorage {
   private rdb: DBAdapter;
-  private psDb: PowerSyncDatabase;
   private schemaManager: DynamicSchemaManager;
 
   public tables: Record<string, Record<string, ColumnType>> = {};
@@ -26,14 +25,25 @@ export class RecordingStorageAdapter extends SqliteBucketStorage {
       (AbstractPowerSyncDatabase as any).transactionMutex
     );
     this.rdb = db.value.database;
-    this.psDb = db.value;
     this.schemaManager = schemaManager.value;
   }
 
   override async setTargetCheckpoint(checkpoint: Checkpoint) {
+    console.log(
+      "🔍 RecordingStorageAdapter: setTargetCheckpoint called",
+      checkpoint
+    );
     await super.setTargetCheckpoint(checkpoint);
     await this.rdb.writeTransaction(async (tx) => {
+      console.log("🔍 Processing", checkpoint.buckets.length, "buckets");
       for (const bucket of checkpoint.buckets) {
+        console.log(
+          "🔍 Inserting bucket:",
+          bucket.bucket,
+          "with",
+          bucket.count,
+          "operations"
+        );
         await tx.execute(
           `INSERT OR REPLACE INTO local_bucket_data(id, total_operations, last_op, download_size, downloading, downloaded_operations)
              VALUES (
@@ -55,9 +65,15 @@ export class RecordingStorageAdapter extends SqliteBucketStorage {
         );
       }
     });
+    console.log("🔍 setTargetCheckpoint completed");
   }
 
   override async syncLocalDatabase(checkpoint: Checkpoint, priority?: number) {
+    console.log(
+      "🔍 RecordingStorageAdapter: syncLocalDatabase called with",
+      checkpoint.buckets.length,
+      "buckets"
+    );
     const r = await super.syncLocalDatabase(checkpoint, priority);
 
     // Refresh schema asynchronously, to allow us to better measure
@@ -74,12 +90,25 @@ export class RecordingStorageAdapter extends SqliteBucketStorage {
   }
 
   override async saveSyncData(batch: SyncDataBatch) {
+    console.log(
+      "🔍 RecordingStorageAdapter: saveSyncData called with",
+      batch.buckets.length,
+      "buckets"
+    );
     await super.saveSyncData(batch);
 
     await this.rdb.writeTransaction(async (tx) => {
       for (const bucket of batch.buckets) {
         // Record metrics
         const size = JSON.stringify(bucket.data).length;
+        console.log(
+          "🔍 Updating bucket:",
+          bucket.bucket,
+          "size:",
+          size,
+          "operations:",
+          bucket.data.length
+        );
         await tx.execute(
           `UPDATE local_bucket_data SET
                 download_size = IFNULL(download_size, 0) + ?,
@@ -98,6 +127,7 @@ export class RecordingStorageAdapter extends SqliteBucketStorage {
       }
     });
 
+    console.log("🔍 saveSyncData completed");
     await this.schemaManager.updateFromOperations(batch);
   }
 }

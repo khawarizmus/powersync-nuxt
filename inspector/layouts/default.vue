@@ -82,8 +82,9 @@
       </div>
 
       <div class="flex gap-2">
-        <NButton @click="clearData">Clear Data</NButton>
-        <NButton @click="logout">Logout</NButton>
+        <NButton n="red sm" icon="carbon:clean" @click="clearData"
+          >Prune & Re-sync</NButton
+        >
       </div>
     </div>
 
@@ -126,9 +127,17 @@
 <script setup lang="ts">
 import { useTimeAgo } from "@vueuse/core";
 
-const { connector, clearData, signOut } = useConnectionManager();
-const { syncStatus, isConnected, hasSynced, db, isSyncing, lastSyncedAt } =
-  usePowerSyncAppDiagnostics();
+const { connector } = useConnectionManager();
+const {
+  syncStatus,
+  isConnected,
+  hasSynced,
+  db,
+  isSyncing,
+  lastSyncedAt,
+  bucketRows,
+  clearData,
+} = usePowerSyncAppDiagnostics();
 
 const route = useRoute();
 const authenticated = computed(() => route.name !== "index");
@@ -146,11 +155,6 @@ watch(selectedTab, (value) => {
 });
 
 const getFlowStatusColor = (status: boolean) => (status ? "green" : "gray");
-
-async function logout() {
-  await signOut();
-  navigateTo("/");
-}
 
 const userID = computed(() => {
   try {
