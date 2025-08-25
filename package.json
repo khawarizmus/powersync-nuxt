@@ -22,16 +22,11 @@
     "dist"
   ],
   "scripts": {
-    "prepack": "nuxt-module-build && npm run inspector:build",
-    "module:build": "nuxt-module-build build",
-    "inspector:build": "nuxi generate inspector",
-    "inspector:dev": "nuxi dev inspector --port 3300",
-    "dev": "npm run play:dev",
-    "dev:prepare": "nuxt-module-build --stub && nuxi prepare inspector",
-    "prepare": "nuxi prepare inspector",
-    "play:dev": "nuxi dev playground --port 3001",
+    "prepack": "nuxt-module-build build",
+    "dev": "nuxi dev playground --port 3001",
     "play:prod": "npm run prepack && nuxi dev playground",
-    "release": "npm run lint && npm run test && npm run prepack && changelogen --release && npm publish && git push --follow-tags",
+    "release": "npm run prepack && changelogen --release && npm publish && git push --follow-tags",
+    "release:strict": "npm run lint && npm run test && npm run prepack && changelogen --release && npm publish && git push --follow-tags",
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest watch"
@@ -41,6 +36,7 @@
     "@nuxt/devtools-kit": "^2.6.2",
     "@nuxt/kit": "^4.0.3",
     "@nuxt/devtools-ui-kit": "^2.6.2",
+    "@iconify-json/carbon": "^1.2.13",
     "@powersync/vue": "^0.4.0",
     "@powersync/web": "^1.25.1",
     "defu": "^6.1.4",
@@ -48,10 +44,12 @@
     "sirv": "^3.0.1"
   },
   "peerDependencies": {
-    "nuxt": "^4.0.3"
+    "nuxt": "^4.0.3",
+    "@powersync/vue": "^0.4.0",
+    "@powersync/web": "^1.25.1",
+    "@journeyapps/wa-sqlite": "^1.2.6"
   },
   "devDependencies": {
-    "@iconify-json/carbon": "^1.2.13",
     "@nuxt/devtools": "^2.6.2",
     "@nuxt/eslint-config": "^1.9.0",
     "@nuxt/module-builder": "^1.0.2",

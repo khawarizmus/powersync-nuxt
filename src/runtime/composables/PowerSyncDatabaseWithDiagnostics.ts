@@ -25,6 +25,7 @@ export class PowerSyncDatabaseWithDiagnostics extends PowerSyncDatabase {
       ...options.flags,
       enableMultiTabs: true,
     };
+    // @ts-expect-error - type error because we are forcing the vfs to be the OPFSCoopSyncVFS
     options.vfs = WASQLiteVFS.OPFSCoopSyncVFS;
     super(options);
 

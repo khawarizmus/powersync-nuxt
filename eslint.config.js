@@ -6,6 +6,6 @@ export default createConfigForNuxt({
     stylistic: false,
   },
   dirs: {
-    root: ["", "playground", "inspector"],
+    root: ["", "playground"],
   },
 });
