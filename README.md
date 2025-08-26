@@ -7,7 +7,10 @@ Find and replace all on all files (CMD+SHIFT+F):
 - Description: Powersync Nuxt module
 -->
 
-# PowerSync Nuxt
+<div align="center">
+  <img src="https://cdn.prod.website-files.com/67eea61902e19994e7054ea0/67f910109a12edc930f8ffb6_powersync-icon.svg" alt="PowerSync Logo" width="64" height="64" />
+  <h1>PowerSync Nuxt</h1>
+</div>
 
 [![npm version][npm-version-src]][npm-version-href]
 [![npm downloads][npm-downloads-src]][npm-downloads-href]
