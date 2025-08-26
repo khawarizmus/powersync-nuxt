@@ -11,6 +11,7 @@ import {
 import { RecordingStorageAdapter } from "./RecordingStorageAdapter";
 import type { DynamicSchemaManager } from "./DynamicSchemaManager";
 import { usePowerSyncInspector } from "../composables/usePowerSyncInspector";
+import { ref, type Ref } from "vue";
 
 export class PowerSyncDatabaseWithDiagnostics extends PowerSyncDatabase {
   private schemaManager!: DynamicSchemaManager;

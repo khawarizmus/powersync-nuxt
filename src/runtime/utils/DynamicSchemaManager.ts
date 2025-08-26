@@ -81,7 +81,6 @@ export class DynamicSchemaManager {
         JSON.stringify(json),
       ]);
       this.dirty = false;
-      console.log("Updated dynamic schema:", this.tables);
     }
   }
 
