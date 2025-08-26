@@ -45,4 +45,8 @@ export default defineConfig({
       { icon: "github", link: "https://github.com/khawarizmus/powersync-nuxt" },
     ],
   },
+
+  markdown: {
+    theme: { dark: "material-theme-palenight", light: "github-light" },
+  },
 });

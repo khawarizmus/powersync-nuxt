@@ -1,3 +1,5 @@
+# Architecture
+
 This is a high level overview of the architecture of the Powersync Nuxt module. And the implementation details of the inspector page.
 
 ## What is it?
@@ -28,12 +30,12 @@ At it's core this module relies on the `PowerSyncDatabaseWithDiagnostics` class 
 When initialized as such:
 
 ```ts
-const db = new PowerSyncDatabaseWithDiagnostics({ // [!code ++]
-      database: {
-        dbFilename: "your-db-filename.sqlite",
-      },
-      schema: yourSchema,
-    });
+const db = new PowerSyncDatabaseWithDiagnostics({
+  database: {
+    dbFilename: "your-db-filename.sqlite",
+  },
+  schema: yourSchema,
+});
 ```
 
 it overrides the following methods:
