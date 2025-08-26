@@ -4,14 +4,8 @@ import type {
   PowerSyncBackendConnector,
   UploadQueueStats,
 } from "@powersync/web";
-import {
-  ref,
-  computed,
-  computedAsync,
-  readonly,
-  onMounted,
-  onUnmounted,
-} from "vue";
+import { ref, computed, readonly, onMounted, onUnmounted } from "vue";
+import { computedAsync } from "@vueuse/core";
 
 type AbstractPowerSyncBackendConnector =
   PowerSyncBackendConnector extends infer T ? T : never;

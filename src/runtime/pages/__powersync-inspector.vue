@@ -305,6 +305,7 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from "vue";
 import { useTimeAgo } from "@vueuse/core";
+// import { usePowerSyncInspectorDiagnostics } from "powersync-nuxt/runtime/composables/usePowerSyncInspectorDiagnostics";
 
 definePageMeta({
   layout: "__powersync-inspector-layout", // this is necessary so that we don't use the main app layout
