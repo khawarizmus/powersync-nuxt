@@ -1,6 +1,31 @@
 # Changelog
 
 
+## v1.2.0
+
+[compare changes](https://github.com/khawarizmus/powersync-nuxt/compare/v1.0.8...v1.2.0)
+
+### 🚀 Enhancements
+
+- Install @vueuse/nuxt as a dep ([c02c522](https://github.com/khawarizmus/powersync-nuxt/commit/c02c522))
+- Add computed properties for upload queue count and size in PowerSync Inspector ([06ee4d3](https://github.com/khawarizmus/powersync-nuxt/commit/06ee4d3))
+
+### 🩹 Fixes
+
+- Added vue-tsc to the build ([c1872d5](https://github.com/khawarizmus/powersync-nuxt/commit/c1872d5))
+
+### 📦 Build
+
+- Fix version bump ([2c596c7](https://github.com/khawarizmus/powersync-nuxt/commit/2c596c7))
+
+### 🏡 Chore
+
+- **release:** V1.0.8 ([3455b80](https://github.com/khawarizmus/powersync-nuxt/commit/3455b80))
+
+### ❤️ Contributors
+
+- Khawarizmus <b.afatah@yahoo.com>
+
 ## v1.0.8
 
 [compare changes](https://github.com/khawarizmus/powersync-nuxt/compare/v1.0.7...v1.0.8)
