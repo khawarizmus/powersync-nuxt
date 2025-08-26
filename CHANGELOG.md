@@ -1,6 +1,22 @@
 # Changelog
 
 
+## v1.2.6
+
+[compare changes](https://github.com/khawarizmus/powersync-nuxt/compare/v1.2.5...v1.2.6)
+
+### 📖 Documentation
+
+- Push progress and test docs ([f2b3e7e](https://github.com/khawarizmus/powersync-nuxt/commit/f2b3e7e))
+
+### 🏡 Chore
+
+- **release:** V1.2.5 ([be255d0](https://github.com/khawarizmus/powersync-nuxt/commit/be255d0))
+
+### ❤️ Contributors
+
+- Khawarizmus <b.afatah@yahoo.com>
+
 ## v1.2.5
 
 [compare changes](https://github.com/khawarizmus/powersync-nuxt/compare/v1.2.4...v1.2.5)
