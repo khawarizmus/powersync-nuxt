@@ -56,13 +56,13 @@
           {{ isSyncing ? "Syncing" : hasSynced ? "Synced" : "Not Synced" }}
         </NTip>
         <NTip
-          :n="getFlowStatusColor(isUploading) + ' xs'"
+          :n="isUploading ? 'green' : 'gray' + ' xs'"
           :icon="isUploading ? 'carbon:cloud-upload' : 'carbon:pause-outline'"
         >
           {{ isUploading ? "Uploading" : "Upload Idle" }}
         </NTip>
         <NTip
-          :n="getFlowStatusColor(isDownloading) + ' xs'"
+          :n="isDownloading ? 'green' : 'gray' + ' xs'"
           :icon="
             isDownloading ? 'carbon:cloud-download' : 'carbon:pause-outline'
           "
@@ -346,8 +346,4 @@ const tabs = [
 watch(selectedTab, (value) => {
   // change tab
 });
-
-function getFlowStatusColor(status: boolean) {
-  return status ? "green" : "gray";
-}
 </script>
