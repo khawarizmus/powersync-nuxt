@@ -303,8 +303,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from "vue";
+import { ref, watch, onMounted, computed } from "vue";
 import { useTimeAgo } from "@vueuse/core";
+import { definePageMeta } from "#imports";
 // import { usePowerSyncInspectorDiagnostics } from "powersync-nuxt/runtime/composables/usePowerSyncInspectorDiagnostics";
 
 definePageMeta({
