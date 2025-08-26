@@ -303,7 +303,7 @@
 </template>
 
 <script setup lang="ts">
-// import { useStatus, usePowerSync } from "@powersync/vue";
+import { ref, watch, onMounted } from "vue";
 import { useTimeAgo } from "@vueuse/core";
 
 definePageMeta({
