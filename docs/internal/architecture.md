@@ -21,7 +21,7 @@ To achieve the above the Module does few things:
 
 ## Implementation details
 
-### PowerSyncDatabaseWithDiagnostics
+### `PowerSyncDatabaseWithDiagnostics`
 
 At it's core this module relies on the `PowerSyncDatabaseWithDiagnostics` class which extends `PowerSyncDatabase` to provide the inspector with a why to highjack the existing client and collect the data needed to display the inspector page.
 

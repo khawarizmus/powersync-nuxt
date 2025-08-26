@@ -25,7 +25,7 @@ The main composable for setting up PowerSync Inspector functionality. This compo
 
 #### `RecordingStorageAdapter`
 - **Type**: `Class`
-- **Description**: Storage adapter class that records operations for diagnostic purposes.
+- **Description**: Used internally. Storage adapter class that records operations for diagnostic purposes.
 
 ### Methods
 
@@ -37,7 +37,7 @@ The main composable for setting up PowerSync Inspector functionality. This compo
 
 #### `getCurrentSchemaManager()`
 - **Returns**: `DynamicSchemaManager`
-- **Description**: Gets the current schema manager instance for dynamic schema operations.
+- **Description**: Used internally. Gets the current schema manager instance for dynamic schema operations.
 
 ### Usage
 
@@ -146,8 +146,8 @@ A comprehensive composable that provides real-time diagnostics data and sync sta
 
 #### Sync Status
 
-```typescript
-<script setup>
+```vue
+<script setup lang="ts">
 const {
   isConnected,
   hasSynced,
@@ -156,8 +156,7 @@ const {
   uploadQueueStats,
   bucketRows,
   totals,
-  clearData,
-  formatBytes
+  clearData
 } = usePowerSyncInspectorDiagnostics();
 </script>
 
@@ -194,7 +193,7 @@ const {
 #### Error Monitoring
 Monitor errors in your components:
 
-```typescript
+```tsx
 const { downloadError, uploadError } = usePowerSyncInspectorDiagnostics();
 
 watch([downloadError, uploadError], ([downloadErr, uploadErr]) => {
@@ -206,11 +205,28 @@ watch([downloadError, uploadError], ([downloadErr, uploadErr]) => {
 #### Progress Feedback
 Show sync progress to users:
 
-```typescript
+```vue
+<script setup lang="ts">
 const { isSyncing, totalDownloadProgress } = usePowerSyncInspectorDiagnostics();
+</script>
 
-// In your template
-<div v-if="isSyncing">
-  Syncing {{ totalDownloadProgress }}%
-</div>
+<template>
+  <div v-if="isSyncing">
+    Syncing {{ totalDownloadProgress }}%
+  </div>
+</template>
+```
+
+#### Upload Queue
+
+```vue
+<script setup lang="ts">
+const { uploadQueueStats } = usePowerSyncInspectorDiagnostics();
+</script>
+
+<template>
+  <div>
+    Pending local changes to sync: {{ uploadQueueStats?.count || 0 }}
+  </div>
+</template>
 ```
