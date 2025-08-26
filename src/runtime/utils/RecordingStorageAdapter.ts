@@ -53,7 +53,6 @@ export class RecordingStorageAdapter extends SqliteBucketStorage {
         );
       }
     });
-    console.log("🔍 setTargetCheckpoint completed");
   }
 
   override async syncLocalDatabase(checkpoint: Checkpoint, priority?: number) {

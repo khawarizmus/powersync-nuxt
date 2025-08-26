@@ -37,9 +37,8 @@ export class PowerSyncDatabaseWithDiagnostics extends PowerSyncDatabase {
 
   protected override generateBucketStorageAdapter() {
     const { getCurrentSchemaManager } = usePowerSyncInspector();
-    // Create schema manager before calling super
+
     const currentSchemaManager = getCurrentSchemaManager();
-    // Use global schema manager if available (during super() call), otherwise instance property
     const schemaManager = currentSchemaManager || this.schemaManager;
 
     const adapter = new RecordingStorageAdapter(
