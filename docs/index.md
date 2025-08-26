@@ -25,6 +25,6 @@ features:
     details: Direct access to PowerSync instance monitoring and real-time connection insights.
   - title: 🗄️ Data Inspection
     details: Seamless local data browsing with powerful debugging and troubleshooting tools.
-  - title: ⚡ Smart Composables
+  - title: ⚡ Useful Composables
     details: Ready-to-use Vue composables for rapid offline-first application development.
 ---
