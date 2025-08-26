@@ -2,6 +2,7 @@ import type { PowerSyncBackendConnector } from "@powersync/web";
 import { DiagnosticsAppSchema } from "../utils/AppSchema";
 import { RecordingStorageAdapter } from "../utils/RecordingStorageAdapter";
 import { DynamicSchemaManager } from "../utils/DynamicSchemaManager";
+import { ref } from "vue";
 
 function shareConnectorWithInspector(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
