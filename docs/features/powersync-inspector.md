@@ -6,7 +6,7 @@ PowerSync Inspector is a tool that helps inspect and diagnose the state of your 
 
 To setup the PowerSync inspector, you need to follow the steps in the [Getting Started](/guide/getting-started) guide.
 
-Once setup the inspector can be accessed on the `http://localhost:3000/__powersync-inspector` route. or via the [Nuxt Devtools](./#nuxt-devtools).
+Once setup the inspector can be accessed on the `http://localhost:3000/__powersync-inspector` route. or via the [Nuxt Devtools](#nuxt-devtools).
 
 ## Features
 

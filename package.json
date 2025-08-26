@@ -4,6 +4,10 @@
   "description": "Powersync Nuxt module",
   "license": "MIT",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/khawarizmus/powersync-nuxt"
+  },
   "exports": {
     ".": {
       "types": "./dist/types.d.mts",
