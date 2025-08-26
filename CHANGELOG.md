@@ -1,6 +1,22 @@
 # Changelog
 
 
+## v1.2.3
+
+[compare changes](https://github.com/khawarizmus/powersync-nuxt/compare/v1.2.2...v1.2.3)
+
+### 🩹 Fixes
+
+- Fix more imports ([5b0f860](https://github.com/khawarizmus/powersync-nuxt/commit/5b0f860))
+
+### 🏡 Chore
+
+- **release:** V1.2.2 ([bed23d6](https://github.com/khawarizmus/powersync-nuxt/commit/bed23d6))
+
+### ❤️ Contributors
+
+- Khawarizmus <b.afatah@yahoo.com>
+
 ## v1.2.2
 
 [compare changes](https://github.com/khawarizmus/powersync-nuxt/compare/v1.2.1...v1.2.2)
