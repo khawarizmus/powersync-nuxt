@@ -58,6 +58,7 @@ export default defineNuxtModule<PowerSyncModuleOptions>({
     );
 
     await installModule("@nuxt/devtools-ui-kit");
+    await installModule("@vueuse/nuxt");
 
     addPlugin(resolver.resolve("./runtime/plugin.client"));
 
