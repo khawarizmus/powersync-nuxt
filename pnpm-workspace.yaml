@@ -1,0 +1,7 @@
+onlyBuiltDependencies:
+  - "@journeyapps/wa-sqlite"
+  - "@parcel/watcher"
+  - "@swc/core"
+  - esbuild
+  - unrs-resolver
+  - better-sqlite3

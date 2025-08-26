@@ -48,6 +48,7 @@
     "@powersync/web": "^1.25.1",
     "defu": "^6.1.4",
     "destr": "^2.0.5",
+    "powersync-nuxt": "link:",
     "sirv": "^3.0.1"
   },
   "peerDependencies": {

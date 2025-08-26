@@ -35,6 +35,9 @@ importers:
       destr:
         specifier: ^2.0.5
         version: 2.0.5
+      powersync-nuxt:
+        specifier: 'link:'
+        version: 'link:'
       sirv:
         specifier: ^3.0.1
         version: 3.0.1

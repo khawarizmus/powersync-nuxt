@@ -36,10 +36,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      #   - name: Configure Git
-      #     run: |
-      #       git config --global user.name "github-actions[bot]"
-      #       git config --global user.email "github-actions[bot]@users.noreply.github.com"
+      - name: Configure Git
+        run: |
+          git config --global user.name "khawarizmus"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Run strict release (with linting and testing)
         if: ${{ inputs.strict }}
