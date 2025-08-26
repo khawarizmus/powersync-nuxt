@@ -296,6 +296,11 @@ export function usePowerSyncInspectorDiagnostics() {
     return 100;
   });
 
+  const uploadQueueSize = computed(() =>
+    formatBytes(uploadQueueStats.value?.size ?? 0)
+  );
+  const uploadQueueCount = computed(() => uploadQueueStats.value?.count ?? 0);
+
   return {
     db,
     connector,
@@ -311,6 +316,8 @@ export function usePowerSyncInspectorDiagnostics() {
     lastSyncedAt: readonly(lastSyncedAt),
     totalDownloadProgress: readonly(totalDownloadProgress),
     uploadQueueStats: readonly(uploadQueueStats),
+    uploadQueueCount: readonly(uploadQueueCount),
+    uploadQueueSize: readonly(uploadQueueSize),
     userID: readonly(userID),
     bucketRows: readonly(bucketRows),
     tableRows: readonly(tableRows),

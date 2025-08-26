@@ -75,7 +75,7 @@
           icon="carbon:server-time"
         >
           Last Synced:
-          {{ useTimeAgo(new Date(lastSyncedAt)) }}
+          {{ lastSyncedFormatted }}
         </NBadge>
         <NBadge
           flex="~ gap-2 items-center"
@@ -212,13 +212,13 @@
 
             <div flex="~ col gap-2">
               <span text="sm gray-500">Upload Queue Count</span>
-              <span text="sm"> {{ uploadQueueStats?.count ?? 0 }} </span>
+              <span text="sm"> {{ uploadQueueCount }} </span>
             </div>
 
             <div flex="~ col gap-2">
               <span text="sm gray-500">Upload Queue Size</span>
               <span text="sm">
-                {{ formatBytes(uploadQueueStats?.size ?? 0) }}
+                {{ uploadQueueSize }}
               </span>
             </div>
 
@@ -324,11 +324,11 @@ const {
   downloadProgressDetails,
   lastSyncedAt,
   totalDownloadProgress,
-  uploadQueueStats,
+  uploadQueueCount,
+  uploadQueueSize,
   totals,
   userID,
   clearData,
-  formatBytes,
 } = usePowerSyncInspectorDiagnostics();
 
 onMounted(async () => {
@@ -342,6 +342,10 @@ const tabs = [
   { label: "Config Inspector", value: "config" },
   { label: "Logs", value: "logs" },
 ];
+
+const lastSyncedFormatted = computed(() =>
+  useTimeAgo(new Date(lastSyncedAt.value))
+);
 
 watch(selectedTab, (value) => {
   // change tab
