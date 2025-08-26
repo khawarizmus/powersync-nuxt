@@ -37,6 +37,10 @@ export interface PowerSyncModuleOptions {
   defaultConnectionParams?: undefined | Record<string, JSONValue>;
 }
 
+export * from "./runtime/composables/usePowerSyncInspectorDiagnostics";
+export * from "./runtime/utils/PowerSyncDatabaseWithDiagnostics";
+export * from "./runtime/composables/usePowerSyncInspector";
+
 export default defineNuxtModule<PowerSyncModuleOptions>({
   meta: {
     name: "powersync-nuxt",
