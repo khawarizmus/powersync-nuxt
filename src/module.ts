@@ -65,7 +65,7 @@ export default defineNuxtModule<PowerSyncModuleOptions>({
     addImports({
       name: "PowerSyncDatabaseWithDiagnostics",
       from: resolver.resolve(
-        "./runtime/composables/PowerSyncDatabaseWithDiagnostics"
+        "./runtime/utils/PowerSyncDatabaseWithDiagnostics"
       ),
     });
 

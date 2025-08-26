@@ -8,9 +8,9 @@ import {
   type StreamingSyncImplementation,
   type WebPowerSyncDatabaseOptions,
 } from "@powersync/web";
-import { RecordingStorageAdapter } from "../utils/RecordingStorageAdapter";
-import type { DynamicSchemaManager } from "../utils/DynamicSchemaManager";
-import { usePowerSyncInspector } from "./usePowerSyncInspector";
+import { RecordingStorageAdapter } from "./RecordingStorageAdapter";
+import type { DynamicSchemaManager } from "./DynamicSchemaManager";
+import { usePowerSyncInspector } from "../composables/usePowerSyncInspector";
 
 export class PowerSyncDatabaseWithDiagnostics extends PowerSyncDatabase {
   private schemaManager!: DynamicSchemaManager;
@@ -24,6 +24,7 @@ export class PowerSyncDatabaseWithDiagnostics extends PowerSyncDatabase {
     options.flags = {
       ...options.flags,
       enableMultiTabs: true,
+      broadcastLogs: true, // enable log broadcasting for better diagnostics
     };
     // @ts-expect-error - type error because we are forcing the vfs to be the OPFSCoopSyncVFS
     options.vfs = WASQLiteVFS.OPFSCoopSyncVFS;
