@@ -1,6 +1,22 @@
 # Changelog
 
 
+## v1.0.8
+
+[compare changes](https://github.com/khawarizmus/powersync-nuxt/compare/v1.0.7...v1.0.8)
+
+### 🩹 Fixes
+
+- Remove function from component ([55717ae](https://github.com/khawarizmus/powersync-nuxt/commit/55717ae))
+
+### 🏡 Chore
+
+- **release:** V1.0.7 ([4016369](https://github.com/khawarizmus/powersync-nuxt/commit/4016369))
+
+### ❤️ Contributors
+
+- Khawarizmus <b.afatah@yahoo.com>
+
 ## v1.0.7
 
 [compare changes](https://github.com/khawarizmus/powersync-nuxt/compare/v1.0.6...v1.0.7)
