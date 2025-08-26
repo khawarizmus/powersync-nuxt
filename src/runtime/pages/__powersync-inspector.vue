@@ -347,5 +347,7 @@ watch(selectedTab, (value) => {
   // change tab
 });
 
-const getFlowStatusColor = (status: boolean) => (status ? "green" : "gray");
+function getFlowStatusColor(status: boolean) {
+  return status ? "green" : "gray";
+}
 </script>
