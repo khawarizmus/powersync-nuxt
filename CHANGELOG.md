@@ -1,6 +1,22 @@
 # Changelog
 
 
+## v1.0.7
+
+[compare changes](https://github.com/khawarizmus/powersync-nuxt/compare/v1.0.6...v1.0.7)
+
+### 📦 Build
+
+- Try different function syntax ([83974bd](https://github.com/khawarizmus/powersync-nuxt/commit/83974bd))
+
+### 🏡 Chore
+
+- **release:** V1.0.6 ([300793b](https://github.com/khawarizmus/powersync-nuxt/commit/300793b))
+
+### ❤️ Contributors
+
+- Khawarizmus <b.afatah@yahoo.com>
+
 ## v1.0.6
 
 [compare changes](https://github.com/khawarizmus/powersync-nuxt/compare/v1.0.5...v1.0.6)
