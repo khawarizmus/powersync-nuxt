@@ -1,6 +1,22 @@
 # Changelog
 
 
+## v1.2.2
+
+[compare changes](https://github.com/khawarizmus/powersync-nuxt/compare/v1.2.1...v1.2.2)
+
+### 🩹 Fixes
+
+- Add explecit import ([441838c](https://github.com/khawarizmus/powersync-nuxt/commit/441838c))
+
+### 🏡 Chore
+
+- **release:** V1.2.1 ([1e69262](https://github.com/khawarizmus/powersync-nuxt/commit/1e69262))
+
+### ❤️ Contributors
+
+- Khawarizmus <b.afatah@yahoo.com>
+
 ## v1.2.1
 
 [compare changes](https://github.com/khawarizmus/powersync-nuxt/compare/v1.2.0...v1.2.1)
