@@ -58,8 +58,6 @@ export class RecordingStorageAdapter extends SqliteBucketStorage {
   override async syncLocalDatabase(checkpoint: Checkpoint, priority?: number) {
     const r = await super.syncLocalDatabase(checkpoint, priority);
 
-    // Refresh schema asynchronously, to allow us to better measure
-    // performance of initial sync.
     setTimeout(() => {
       this.schemaManager.refreshSchema(this.rdb);
     }, 60);
