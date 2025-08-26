@@ -1,6 +1,22 @@
 # Changelog
 
 
+## v1.2.4
+
+[compare changes](https://github.com/khawarizmus/powersync-nuxt/compare/v1.2.3...v1.2.4)
+
+### 🩹 Fixes
+
+- Use nuxt import for comosable ([6e947ff](https://github.com/khawarizmus/powersync-nuxt/commit/6e947ff))
+
+### 🏡 Chore
+
+- **release:** V1.2.3 ([d374111](https://github.com/khawarizmus/powersync-nuxt/commit/d374111))
+
+### ❤️ Contributors
+
+- Khawarizmus <b.afatah@yahoo.com>
+
 ## v1.2.3
 
 [compare changes](https://github.com/khawarizmus/powersync-nuxt/compare/v1.2.2...v1.2.3)
