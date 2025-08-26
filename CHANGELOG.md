@@ -1,6 +1,22 @@
 # Changelog
 
 
+## v1.2.1
+
+[compare changes](https://github.com/khawarizmus/powersync-nuxt/compare/v1.2.0...v1.2.1)
+
+### 🩹 Fixes
+
+- Add optional accessor ([7e7314c](https://github.com/khawarizmus/powersync-nuxt/commit/7e7314c))
+
+### 🏡 Chore
+
+- **release:** V1.2.0 ([045f9e7](https://github.com/khawarizmus/powersync-nuxt/commit/045f9e7))
+
+### ❤️ Contributors
+
+- Khawarizmus <b.afatah@yahoo.com>
+
 ## v1.2.0
 
 [compare changes](https://github.com/khawarizmus/powersync-nuxt/compare/v1.0.8...v1.2.0)
