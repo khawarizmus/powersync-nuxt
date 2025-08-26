@@ -1,6 +1,22 @@
 # Changelog
 
 
+## v1.0.5
+
+[compare changes](https://github.com/khawarizmus/powersync-nuxt/compare/v1.0.4...v1.0.5)
+
+### 🩹 Fixes
+
+- Add import on vue pahe ([a773f30](https://github.com/khawarizmus/powersync-nuxt/commit/a773f30))
+
+### 🏡 Chore
+
+- **release:** V1.0.4 ([8dd04ff](https://github.com/khawarizmus/powersync-nuxt/commit/8dd04ff))
+
+### ❤️ Contributors
+
+- Khawarizmus <b.afatah@yahoo.com>
+
 ## v1.0.4
 
 [compare changes](https://github.com/khawarizmus/powersync-nuxt/compare/v1.0.3...v1.0.4)
