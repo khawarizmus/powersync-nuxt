@@ -245,32 +245,32 @@
           <div grid="~ cols-5 gap-4" mb="4">
             <div flex="~ col gap-2">
               <span text="sm gray-500">Buckets Synced</span>
-              <span text="sm"> {{ totals.buckets }} </span>
+              <span text="sm"> {{ totals?.buckets }} </span>
             </div>
 
             <div flex="~ col gap-2">
               <span text="sm gray-500">Rows Synced</span>
-              <span text="sm"> {{ totals.row_count }} </span>
+              <span text="sm"> {{ totals?.row_count }} </span>
             </div>
 
             <div flex="~ col gap-2">
               <span text="sm gray-500">Data size</span>
               <span text="sm">
-                {{ totals.data_size }}
+                {{ totals?.data_size }}
               </span>
             </div>
 
             <div flex="~ col gap-2">
               <span text="sm gray-500">Metadata size</span>
               <span text="sm">
-                {{ totals.metadata_size }}
+                {{ totals?.metadata_size }}
               </span>
             </div>
 
             <div flex="~ col gap-2">
               <span text="sm gray-500">Download size</span>
               <span text="sm">
-                {{ totals.download_size }}
+                {{ totals?.download_size }}
               </span>
             </div>
           </div>
@@ -283,14 +283,14 @@
             <div flex="~ col gap-2">
               <span text="sm gray-500">Total operations</span>
               <span text="sm">
-                {{ totals.total_operations }}
+                {{ totals?.total_operations }}
               </span>
             </div>
 
             <div flex="~ col gap-2">
               <span text="sm gray-500">Downloaded operations</span>
               <span text="sm">
-                {{ totals.downloaded_operations }}
+                {{ totals?.downloaded_operations }}
               </span>
             </div>
           </div>
