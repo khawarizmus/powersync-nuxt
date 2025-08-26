@@ -6,6 +6,8 @@ import type {
 } from "@powersync/web";
 import { ref, computed, readonly, onMounted, onUnmounted } from "vue";
 import { computedAsync } from "@vueuse/core";
+import { usePowerSyncInspector } from "./usePowerSyncInspector";
+import { useNuxtApp } from "#imports";
 
 type AbstractPowerSyncBackendConnector =
   PowerSyncBackendConnector extends infer T ? T : never;

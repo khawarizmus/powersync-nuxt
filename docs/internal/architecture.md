@@ -21,4 +21,4 @@ To achieve the above the Module does few things:
 
 ## Implementation details
 
-The inspector page is a page that provides a way to inspect the state of the Powersync instance. It is built on top of the Powersync SDK and the Nuxt framework.
+At it's 
