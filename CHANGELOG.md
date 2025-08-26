@@ -1,6 +1,22 @@
 # Changelog
 
 
+## v1.2.8
+
+[compare changes](https://github.com/khawarizmus/powersync-nuxt/compare/v1.2.7...v1.2.8)
+
+### 📖 Documentation
+
+- Changed code theme ([1f56c9b](https://github.com/khawarizmus/powersync-nuxt/commit/1f56c9b))
+
+### 🏡 Chore
+
+- **release:** V1.2.7 ([07a5d48](https://github.com/khawarizmus/powersync-nuxt/commit/07a5d48))
+
+### ❤️ Contributors
+
+- Khawarizmus <b.afatah@yahoo.com>
+
 ## v1.2.7
 
 [compare changes](https://github.com/khawarizmus/powersync-nuxt/compare/v1.2.6...v1.2.7)
