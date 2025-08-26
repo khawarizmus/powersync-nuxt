@@ -8,6 +8,13 @@ on:
         required: false
         default: false
         type: boolean
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  id-token: write
 
 jobs:
   release:
@@ -66,21 +73,24 @@ jobs:
         id: changelog
         run: |
           # Get the changelog content between the latest tag and the previous one
+          latest_tag="${{ steps.get_tag.outputs.tag }}"
+          version_without_v="${latest_tag#v}"
           previous_tag=$(git tag --sort=-version:refname | sed -n '2p')
+
           if [ -z "$previous_tag" ]; then
               # If no previous tag, get all commits
-              changelog=$(git log --pretty=format:"- %s" ${{ steps.get_tag.outputs.tag }})
+              changelog=$(git log --pretty=format:"- %s" "$latest_tag")
           else
               # Get commits between previous tag and current tag
-              changelog=$(git log --pretty=format:"- %s" $previous_tag..${{ steps.get_tag.outputs.tag }})
+              changelog=$(git log --pretty=format:"- %s" "$previous_tag..$latest_tag")
           fi
 
           # Also try to extract from CHANGELOG.md if it exists
           if [ -f "CHANGELOG.md" ]; then
               # Extract the latest version section from CHANGELOG.md
-              changelog_section=$(awk '/^## \[?'${steps.get_tag.outputs.tag#v}'\]?/ {flag=1; next} /^## / {flag=0} flag' CHANGELOG.md || echo "")
+              changelog_section=$(awk '/^## \[?'"$version_without_v"'\]?/ {flag=1; next} /^## / {flag=0} flag' CHANGELOG.md || echo "")
               if [ ! -z "$changelog_section" ]; then
-              changelog="$changelog_section"
+                  changelog="$changelog_section"
               fi
           fi
 
