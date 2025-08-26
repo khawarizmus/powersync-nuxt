@@ -26,7 +26,7 @@
     "dist"
   ],
   "scripts": {
-    "prepack": "nuxt-module-build build",
+    "prepack": "nuxi prepare playground && nuxt-module-build build",
     "dev": "nuxi dev playground --port 3001",
     "play:prod": "npm run prepack && nuxi dev playground",
     "release": "npm run prepack && changelogen --release && npm publish && git push --follow-tags",
@@ -35,7 +35,7 @@
     "test": "vitest run",
     "test:watch": "vitest watch",
     "docs:dev": "vitepress dev docs",
-    "docs:build": "vitepress build docs",
+    "docs:build": "nuxi prepare playground && vitepress build docs",
     "docs:preview": "vitepress preview docs"
   },
   "dependencies": {
