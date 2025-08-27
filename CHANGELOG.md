@@ -1,6 +1,22 @@
 # Changelog
 
 
+## v1.2.11
+
+[compare changes](https://github.com/khawarizmus/powersync-nuxt/compare/v1.2.10...v1.2.11)
+
+### 📖 Documentation
+
+- Fix wrong link ([1bd6210](https://github.com/khawarizmus/powersync-nuxt/commit/1bd6210))
+
+### 🏡 Chore
+
+- **release:** V1.2.10 ([63fb27f](https://github.com/khawarizmus/powersync-nuxt/commit/63fb27f))
+
+### ❤️ Contributors
+
+- Khawarizmus <b.afatah@yahoo.com>
+
 ## v1.2.10
 
 [compare changes](https://github.com/khawarizmus/powersync-nuxt/compare/v1.2.9...v1.2.10)
