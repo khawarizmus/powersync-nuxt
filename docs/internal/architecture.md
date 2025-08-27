@@ -256,7 +256,7 @@ This allows for greater flexibility as developers can build their own components
 
 ### Inspector Page
 
-The inspector page is a [Nuxt page](https://nuxt.com/docs/4.x/guide/directory-structure/app/pages) that is used to display the diagnostics data. it is built using the [Devtools UI Kit](https://ui.devtools.powersync.dev/) and the [VueUse](https://vueuse.org/) library.
+The inspector page is a [Nuxt page](https://nuxt.com/docs/4.x/guide/directory-structure/app/pages) that is used to display the diagnostics data. it is built using the [Devtools UI Kit](https://devtools.nuxt.com/module/ui-kit) and the [VueUse](https://vueuse.org/) library.
 
 It uses the `usePowerSyncInspectorDiagnostics` composable to get the diagnostics data and display it in the page.
 
@@ -265,7 +265,7 @@ It uses the `usePowerSyncInspectorDiagnostics` composable to get the diagnostics
 The module is a [Nuxt module](https://nuxt.com/docs/4.x/guide/directory-structure/app/modules) and it does the followings under the hood:
 
 - Exposes it's own options to [Nuxt runtime config](https://nuxt.com/docs/4.x/guide/going-further/runtime-config)
-- Installs the [Devtools UI Kit](https://ui.devtools.powersync.dev/) and the [VueUse](https://vueuse.org/) nuxt modules automatically.
+- Installs the [Devtools UI Kit](https://devtools.nuxt.com/module/ui-kit) and the [VueUse](https://vueuse.org/) nuxt modules automatically.
 - Injects a plugin that uses the [Nuxt runtime config](https://nuxt.com/docs/4.x/api/composables/use-runtime-config) to expose the module options via a global variable in the Nuxt app.
 - Adds few auto-imports for the developers to use in their Nuxt app, namely:
   - `usePowerSyncInspector`
