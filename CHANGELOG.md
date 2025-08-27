@@ -1,6 +1,22 @@
 # Changelog
 
 
+## v1.2.12
+
+[compare changes](https://github.com/khawarizmus/powersync-nuxt/compare/v1.2.11...v1.2.12)
+
+### 📖 Documentation
+
+- Add more details to the  composable ([7dc8493](https://github.com/khawarizmus/powersync-nuxt/commit/7dc8493))
+
+### 🏡 Chore
+
+- **release:** V1.2.11 ([bccee17](https://github.com/khawarizmus/powersync-nuxt/commit/bccee17))
+
+### ❤️ Contributors
+
+- Khawarizmus <b.afatah@yahoo.com>
+
 ## v1.2.11
 
 [compare changes](https://github.com/khawarizmus/powersync-nuxt/compare/v1.2.10...v1.2.11)
