@@ -246,7 +246,7 @@ The `usePowerSyncInspector` composable is used to expose few helpers and classes
 
 - It also exposes the `shareConnectorWithInspector` function which stores the connector in a global variable in the Nuxt app that can be used to share the connector with the inspector.
 
-For better understanding of it's practical usage for developers, check the [Getting Started](../getting-started/overview.md) guide.
+For better understanding of it's practical usage for developers, check the [Getting Started](../guide/getting-started.md) guide.
 
 ### usePowerSyncInspectorDiagnostics
 
