@@ -9,6 +9,7 @@ import { computedAsync } from "@vueuse/core";
 import { usePowerSyncInspector } from "./usePowerSyncInspector";
 import { useNuxtApp } from "#imports";
 
+// types
 type AbstractPowerSyncBackendConnector =
   PowerSyncBackendConnector extends infer T ? T : never;
 
@@ -25,6 +26,7 @@ interface JSONObject {
 }
 type JSONArray = JSONValue[];
 
+// queries
 const BUCKETS_QUERY = `
 WITH
   oplog_by_table AS
@@ -105,7 +107,10 @@ function formatBytes(bytes: number, decimals = 2) {
 export function usePowerSyncInspectorDiagnostics() {
   const db = usePowerSync();
   const syncStatus = useStatus();
+  const { getCurrentSchemaManager } = usePowerSyncInspector();
+  const nuxtApp = useNuxtApp();
 
+  // reactive state
   const hasSynced = ref(syncStatus.value?.hasSynced || false);
   const isConnected = ref(syncStatus.value?.connected || false);
   const isSyncing = ref(false);
@@ -125,6 +130,86 @@ export function usePowerSyncInspectorDiagnostics() {
   const tableRows = ref<null | any[]>(null);
 
   const uploadQueueStats = ref<null | UploadQueueStats>(null);
+
+  // computed state
+  const totals = computed(() => ({
+    buckets: bucketRows.value?.length ?? 0,
+    row_count:
+      bucketRows.value?.reduce((total, row) => total + row.row_count, 0) ?? 0,
+    downloaded_operations: bucketRows.value?.reduce(
+      (total, row) => total + row.downloaded_operations,
+      0
+    ),
+    total_operations:
+      bucketRows.value?.reduce(
+        (total, row) => total + row.total_operations,
+        0
+      ) ?? 0,
+    data_size: formatBytes(
+      bucketRows.value?.reduce((total, row) => total + row.data_size, 0) ?? 0
+    ),
+    metadata_size: formatBytes(
+      bucketRows.value?.reduce((total, row) => total + row.metadata_size, 0) ??
+        0
+    ),
+    download_size: formatBytes(
+      bucketRows.value?.reduce((total, row) => total + row.download_size, 0) ??
+        0
+    ),
+  }));
+
+  const connector = computed<AbstractPowerSyncBackendConnector | null>(() => {
+    const connector =
+      nuxtApp.vueApp.config.globalProperties.$inspectorPowerSyncConnector;
+    return connector as AbstractPowerSyncBackendConnector | null;
+  });
+  const moduleOptions = computed(() => {
+    const options =
+      nuxtApp.vueApp.config.globalProperties.$inspectorPowerSyncModuleOptions;
+    return options;
+  });
+
+  const userID = computedAsync(async () => {
+    try {
+      // @ts-expect-error - connector to be double ref or something
+      const token = (await connector.value?.value.fetchCredentials())?.token;
+
+      if (!token) return null;
+
+      const [_head, body, _signature] = token.split(".");
+      const payload = JSON.parse(atob(body ?? ""));
+      return payload.sub;
+    } catch {
+      return null;
+    }
+  });
+
+  const totalDownloadProgress = computed(() => {
+    if (!hasSynced.value || isSyncing.value) {
+      return (
+        (syncStatus.value?.downloadProgress?.downloadedFraction ?? 0) * 100
+      ).toFixed(1);
+    }
+    return 100;
+  });
+
+  const uploadQueueSize = computed(() =>
+    formatBytes(uploadQueueStats.value?.size ?? 0)
+  );
+  const uploadQueueCount = computed(() => uploadQueueStats.value?.count ?? 0);
+
+  // functions
+  const clearData = () => {
+    db.value.syncStreamImplementation?.disconnect();
+    db.value?.disconnectAndClear();
+    const schemaManager = getCurrentSchemaManager();
+    schemaManager.clear();
+    schemaManager.refreshSchema(db.value.database);
+    db.value.connect(
+      connector.value!,
+      moduleOptions.value?.defaultConnectionParams
+    );
+  };
 
   async function refreshState() {
     if (db.value) {
@@ -219,90 +304,7 @@ export function usePowerSyncInspectorDiagnostics() {
     });
   });
 
-  const totals = computed(() => ({
-    buckets: bucketRows.value?.length ?? 0,
-    row_count:
-      bucketRows.value?.reduce((total, row) => total + row.row_count, 0) ?? 0,
-    downloaded_operations: bucketRows.value?.reduce(
-      (total, row) => total + row.downloaded_operations,
-      0
-    ),
-    total_operations:
-      bucketRows.value?.reduce(
-        (total, row) => total + row.total_operations,
-        0
-      ) ?? 0,
-    data_size: formatBytes(
-      bucketRows.value?.reduce((total, row) => total + row.data_size, 0) ?? 0
-    ),
-    metadata_size: formatBytes(
-      bucketRows.value?.reduce((total, row) => total + row.metadata_size, 0) ??
-        0
-    ),
-    download_size: formatBytes(
-      bucketRows.value?.reduce((total, row) => total + row.download_size, 0) ??
-        0
-    ),
-  }));
-
-  const { getCurrentSchemaManager } = usePowerSyncInspector();
-  const nuxtApp = useNuxtApp();
-
-  type AbstractPowerSyncBackendConnector =
-    PowerSyncBackendConnector extends infer T ? T : never;
-
-  const connector = computed<AbstractPowerSyncBackendConnector | null>(() => {
-    const connector =
-      nuxtApp.vueApp.config.globalProperties.$inspectorPowerSyncConnector;
-    return connector as AbstractPowerSyncBackendConnector | null;
-  });
-  const moduleOptions = computed(() => {
-    const options =
-      nuxtApp.vueApp.config.globalProperties.$inspectorPowerSyncModuleOptions;
-    return options;
-  });
-
-  const clearData = () => {
-    db.value.syncStreamImplementation?.disconnect();
-    db.value?.disconnectAndClear();
-    const schemaManager = getCurrentSchemaManager();
-    schemaManager.clear();
-    schemaManager.refreshSchema(db.value.database);
-    db.value.connect(
-      connector.value!,
-      moduleOptions.value?.defaultConnectionParams
-    );
-  };
-
-  const userID = computedAsync(async () => {
-    try {
-      // @ts-expect-error - connector to be double ref or something
-      const token = (await connector.value?.value.fetchCredentials())?.token;
-
-      if (!token) return null;
-
-      const [_head, body, _signature] = token.split(".");
-      const payload = JSON.parse(atob(body ?? ""));
-      return payload.sub;
-    } catch {
-      return null;
-    }
-  });
-
-  const totalDownloadProgress = computed(() => {
-    if (!hasSynced.value || isSyncing.value) {
-      return (
-        (syncStatus.value?.downloadProgress?.downloadedFraction ?? 0) * 100
-      ).toFixed(1);
-    }
-    return 100;
-  });
-
-  const uploadQueueSize = computed(() =>
-    formatBytes(uploadQueueStats.value?.size ?? 0)
-  );
-  const uploadQueueCount = computed(() => uploadQueueStats.value?.count ?? 0);
-
+  // exposed state
   return {
     db,
     connector,

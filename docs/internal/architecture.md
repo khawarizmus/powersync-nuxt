@@ -250,9 +250,303 @@ For better understanding of it's practical usage for developers, check the [Gett
 
 ### usePowerSyncInspectorDiagnostics
 
-The `usePowerSyncInspectorDiagnostics` composable is used to expose the diagnostics data. it is used by the inspector page to display the data. and can be used by developers to access the data in their own components.
+The `usePowerSyncInspectorDiagnostics` composable is used to expose the diagnostics data. it is used by the inspector page to display the diagnostics data. and can be used by developers to access the diagnostics data in their own components.
 
-This allows for greater flexibility as developers can build their own components to display the data directly in their app.
+This allows for greater flexibility as developers can build their own components to display the diagnostics data directly in their app.
+
+#### Querying the diagnostics data
+
+The `usePowerSyncInspectorDiagnostics` composable uses few custom queries to get buckets diagnostics data. and tables data. below are the queries used to get the data:
+
+::: code-group
+
+```sql [BUCKETS_QUERY]
+WITH
+  oplog_by_table AS
+    (SELECT -- For each bucket + table combination, calculate sizes
+      bucket,                                         -- e.g., "global", "user_data"  
+      row_type,                                       -- e.g., "users", "products"
+      sum(length(ifnull(data, ''))) as data_size,     -- Total bytes of actual data
+      sum(length(row_type) + length(row_id) + length(key) + 44) as metadata_size, -- Overhead bytes
+      count() as row_count                            -- Number of records
+    FROM ps_oplog
+    GROUP BY bucket, row_type),
+
+  oplog_stats AS
+    (SELECT -- Roll up stats per bucket across all tables
+      bucket as bucket_id,
+      sum(data_size) as data_size,        -- Total data across all tables in bucket
+      sum(metadata_size) as metadata_size, -- Total metadata across all tables 
+      sum(row_count) as row_count,        -- Total records across all tables
+      json_group_array(row_type) tables   -- Array of table names: ["users", "products"]
+    FROM oplog_by_table
+    GROUP BY bucket)
+
+-- Combine sync progress (local_bucket_data) with storage stats (oplog_stats)
+SELECT
+  local.id as name,                    -- Bucket name
+  stats.tables,                        -- Which tables are in this bucket
+  stats.data_size,                     -- How much data is stored
+  stats.metadata_size,                 -- How much overhead
+  local.download_size,                 -- How much was downloaded (from RecordingStorageAdapter)
+  local.downloaded_operations,         -- Progress: operations completed
+  local.total_operations,              -- Progress: operations total
+  local.downloading                    -- Is it still downloading?
+FROM local_bucket_data local
+LEFT JOIN ps_buckets ON ps_buckets.name = local.id
+LEFT JOIN oplog_stats stats ON stats.bucket_id = ps_buckets.id
+```
+
+```sql [TABLES_QUERY]
+SELECT row_type as name, count() as count, sum(length(data)) as size FROM ps_oplog GROUP BY row_type
+```
+
+```sql [BUCKETS_QUERY_FAST]
+SELECT
+  local.id as name,
+  '[]' as tables,           -- Empty array (no table details)
+  0 as data_size,           -- No storage stats
+  0 as metadata_size,       -- No storage stats  
+  0 as row_count,           -- No storage stats
+  local.download_size,      -- Just download progress
+  local.downloaded_operations,
+  local.total_operations,
+  local.downloading
+FROM local_bucket_data local`
+```
+:::
+
+#### Reactive State Management
+
+The composable manages several reactive state variables that track the current status of PowerSync:
+
+```ts
+// Connection & Sync Status
+const hasSynced = ref(syncStatus.value?.hasSynced || false);
+const isConnected = ref(syncStatus.value?.connected || false);
+const isSyncing = ref(false);
+const isDownloading = ref(
+  syncStatus.value?.dataFlowStatus.downloading || false
+);
+const isUploading = ref(syncStatus.value?.dataFlowStatus.uploading || false);
+
+// Progress & Timing
+const lastSyncedAt = ref(syncStatus.value?.lastSyncedAt || "");
+const downloadProgressDetails = ref(
+  syncStatus.value?.dataFlowStatus.downloadProgress || null
+);
+const uploadQueueStats = ref<null | UploadQueueStats>(null);
+
+// Error Handling
+const uploadError = ref(syncStatus.value?.dataFlowStatus.uploadError || null);
+const downloadError = ref(
+  syncStatus.value?.dataFlowStatus.downloadError || null
+);
+
+// Data & Schema
+const bucketRows = ref<null | any[]>(null);
+const tableRows = ref<null | any[]>(null);
+```
+
+These refs are initialized from the current `syncStatus` but then get updated in real-time through listeners.
+
+#### Computed Aggregations
+
+The composable provides computed totals across all buckets:
+
+```ts
+const totals = computed(() => ({
+  buckets: bucketRows.value?.length ?? 0,
+  row_count: bucketRows.value?.reduce(...) ?? 0,
+  downloaded_operations: bucketRows.value?.reduce(...),
+  total_operations: bucketRows.value?.reduce(...) ?? 0,
+  data_size: formatBytes(...),
+  metadata_size: formatBytes(...),
+  download_size: formatBytes(...),
+}));
+```
+
+#### Querying the diagnostics data
+
+```ts
+async function refreshState() {
+  if (db.value) {
+    const { synced_at } = await db.value.get<{ synced_at: string | null }>(
+      "SELECT powersync_last_synced_at() as synced_at"
+    );
+
+    uploadQueueStats.value = await db.value?.getUploadQueueStats(true);
+
+    if (synced_at != null && !syncStatus.value?.dataFlowStatus.downloading) {
+      // These are potentially expensive queries - do not run during initial sync
+      bucketRows.value = await db.value.getAll(BUCKETS_QUERY);
+      tableRows.value = await db.value.getAll(TABLES_QUERY);
+    } else if (synced_at != null) {
+      // Busy downloading, but have already synced once
+      bucketRows.value = await db.value.getAll(BUCKETS_QUERY_FAST);
+      // Load tables if we haven't yet
+      if (tableRows.value == null) {
+        tableRows.value = await db.value.getAll(TABLES_QUERY);
+      }
+    } else {
+      // Fast query to show progress during initial sync / while downloading bulk data
+      bucketRows.value = await db.value.getAll(BUCKETS_QUERY_FAST);
+      tableRows.value = null;
+    }
+  }
+}
+```
+
+**Performance Strategy:**
+- Always fetches upload queue stats for real-time upload monitoring
+- Uses expensive queries only when sync is idle to avoid blocking active operations
+- Falls back to fast queries during downloads for responsive progress updates
+
+#### Real-time Updates
+
+The composable automatically updates when PowerSync state changes:
+
+**Status Listener:**
+```ts
+// Register listener for PowerSync status changes
+const unregisterListener = db.value.registerListener({
+  statusChanged: (newStatus) => {
+    // Update reactive status
+    hasSynced.value = !!newStatus.hasSynced;
+    isConnected.value = !!newStatus.connected;
+    isDownloading.value = !!newStatus.dataFlowStatus.downloading;
+    isUploading.value = !!newStatus.dataFlowStatus.uploading;
+    lastSyncedAt.value = newStatus.lastSyncedAt || "";
+    uploadError.value = newStatus.dataFlowStatus.uploadError || null;
+    downloadError.value = newStatus.dataFlowStatus.downloadError || null;
+    downloadProgressDetails.value =
+      newStatus.dataFlowStatus.downloadProgress || null;
+
+    if (
+      newStatus?.hasSynced === undefined ||
+      (newStatus?.priorityStatusEntries?.length &&
+        newStatus.priorityStatusEntries.length > 0)
+    ) {
+      hasSynced.value =
+        newStatus?.priorityStatusEntries.every(
+          (entry) => entry.hasSynced
+        ) ?? false;
+    }
+
+    if (
+      newStatus?.dataFlowStatus.downloading ||
+      newStatus?.dataFlowStatus.uploading
+    ) {
+      isSyncing.value = true;
+    } else {
+      isSyncing.value = false;
+    }
+  },
+});
+```
+
+**Database Change Listener:**
+```ts
+db.value.onChangeWithCallback(
+  { async onChange(_event) { await refreshState(); } },
+  {
+    tables: [
+      "ps_oplog",                           // PowerSync operation log
+      "ps_buckets",                         // Bucket definitions  
+      "ps_data_local__local_bucket_data",   // Our tracking table
+      "ps_crud",                            // Upload queue
+    ],
+    throttleMs: 500  // Avoid excessive updates
+  }
+);
+```
+
+#### User Authentication
+
+Extracts user information from JWT tokens:
+
+```ts
+const userID = computedAsync(async () => {
+  const token = await connector.value?.fetchCredentials()?.token;
+  if (!token) return null;
+  
+  const [_head, body, _signature] = token.split(".");
+  const payload = JSON.parse(atob(body));  // Decode JWT payload
+  return payload.sub;  // Return user ID from token
+});
+```
+
+#### Utility Functions
+
+**Data Management:**
+```ts
+const clearData = () => {
+  db.value?.disconnectAndClear();           // Clear all sync data
+  schemaManager.clear();                    // Reset schema discoveries
+  schemaManager.refreshSchema(db.value.database); // Apply clean schema
+  db.value.connect(connector.value!);       // Reconnect
+};
+```
+
+**Formatting:**
+```ts
+// Converts bytes to human-readable format (KB, MB, GB, etc.)
+const formatBytes = (bytes: number) => {
+  if (!+bytes) return "0 Bytes";
+
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = [
+    "Bytes",
+    "KiB",
+    "MiB",
+    "GiB",
+    "TiB",
+    "PiB",
+    "EiB",
+    "ZiB",
+    "YiB",
+  ];
+
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+  return `${Number.parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${
+    sizes[i]
+  }`;
+};
+```
+
+#### Exposed API
+
+```ts
+// exposed state
+return {
+  db,
+  connector,
+  syncStatus: readonly(syncStatus),
+  hasSynced: readonly(hasSynced),
+  isConnected: readonly(isConnected),
+  isSyncing: readonly(isSyncing),
+  isDownloading: readonly(isDownloading),
+  isUploading: readonly(isUploading),
+  downloadError: readonly(downloadError),
+  uploadError: readonly(uploadError),
+  downloadProgressDetails: readonly(downloadProgressDetails),
+  lastSyncedAt: readonly(lastSyncedAt),
+  totalDownloadProgress: readonly(totalDownloadProgress),
+  uploadQueueStats: readonly(uploadQueueStats),
+  uploadQueueCount: readonly(uploadQueueCount),
+  uploadQueueSize: readonly(uploadQueueSize),
+  userID: readonly(userID),
+  bucketRows: readonly(bucketRows),
+  tableRows: readonly(tableRows),
+  totals: readonly(totals),
+  clearData,
+  formatBytes,
+};
+```
+
+All state is exposed as `readonly` to prevent external mutations, while functions like `clearData` and `formatBytes` are provided for controlled interactions.
 
 ### Inspector Page
 
@@ -262,7 +556,7 @@ It uses the `usePowerSyncInspectorDiagnostics` composable to get the diagnostics
 
 ### Module
 
-The module is a [Nuxt module](https://nuxt.com/docs/4.x/guide/directory-structure/app/modules) and it does the followings under the hood:
+The module is a [Nuxt module](https://nuxt.com/docs/4.x/guide/directory-structure/modules) and it does the followings under the hood:
 
 - Exposes it's own options to [Nuxt runtime config](https://nuxt.com/docs/4.x/guide/going-further/runtime-config)
 - Installs the [Devtools UI Kit](https://devtools.nuxt.com/module/ui-kit) and the [VueUse](https://vueuse.org/) nuxt modules automatically.
