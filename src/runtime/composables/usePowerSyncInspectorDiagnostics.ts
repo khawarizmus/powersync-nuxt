@@ -111,6 +111,7 @@ export function usePowerSyncInspectorDiagnostics() {
   const nuxtApp = useNuxtApp();
 
   // reactive state
+  const isDiagnosticSchemaSetup = ref(true);
   const hasSynced = ref(syncStatus.value?.hasSynced || false);
   const isConnected = ref(syncStatus.value?.connected || false);
   const isSyncing = ref(false);
@@ -205,6 +206,7 @@ export function usePowerSyncInspectorDiagnostics() {
     const schemaManager = getCurrentSchemaManager();
     schemaManager.clear();
     schemaManager.refreshSchema(db.value.database);
+    console.log("connecting to db");
     db.value.connect(
       connector.value!,
       moduleOptions.value?.defaultConnectionParams
@@ -296,7 +298,13 @@ export function usePowerSyncInspectorDiagnostics() {
       }
     );
 
-    await refreshState();
+    try {
+      await refreshState();
+    } catch (error: any) {
+      if (error.message === "no such table: local_bucket_data") {
+        isDiagnosticSchemaSetup.value = false;
+      }
+    }
 
     // Clean up listener on unmount
     onUnmounted(() => {
@@ -308,6 +316,7 @@ export function usePowerSyncInspectorDiagnostics() {
   return {
     db,
     connector,
+    isDiagnosticSchemaSetup: readonly(isDiagnosticSchemaSetup),
     syncStatus: readonly(syncStatus),
     hasSynced: readonly(hasSynced),
     isConnected: readonly(isConnected),

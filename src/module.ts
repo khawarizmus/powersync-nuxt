@@ -6,6 +6,8 @@ import {
   addImports,
   extendPages,
   installModule,
+  addLayout,
+  addComponentsDir,
 } from "@nuxt/kit";
 import { defu } from "defu";
 import { setupDevToolsUI } from "./devtools";
@@ -81,6 +83,16 @@ export default defineNuxtModule<PowerSyncModuleOptions>({
         "./runtime/composables/usePowerSyncInspectorDiagnostics"
       ),
     });
+
+    // From the runtime directory
+    addComponentsDir({
+      path: resolver.resolve("runtime/components"),
+    });
+
+    addLayout(
+      resolver.resolve("./runtime/layouts/powersync-inspector-layout.vue"),
+      "powersync-inspector-layout"
+    );
 
     extendPages((pages) => {
       pages.push({
