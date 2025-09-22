@@ -60,6 +60,7 @@ export default defineNuxtModule<PowerSyncModuleOptions>({
     );
 
     await installModule("@nuxt/devtools-ui-kit");
+    await installModule("@unocss/nuxt");
     await installModule("@vueuse/nuxt");
 
     addPlugin(resolver.resolve("./runtime/plugin.client"));
@@ -102,6 +103,68 @@ export default defineNuxtModule<PowerSyncModuleOptions>({
         name: "Powersync Inspector",
       });
     });
+
+    // Add Reka UI auto-imports for your module components
+    addImports([
+      // Editable components
+      {
+        name: "EditableRoot",
+        from: "reka-ui",
+      },
+      {
+        name: "EditableArea",
+        from: "reka-ui",
+      },
+      {
+        name: "EditableInput",
+        from: "reka-ui",
+      },
+      {
+        name: "EditablePreview",
+        from: "reka-ui",
+      },
+      {
+        name: "EditableEditTrigger",
+        from: "reka-ui",
+      },
+      {
+        name: "EditableSubmitTrigger",
+        from: "reka-ui",
+      },
+      {
+        name: "EditableCancelTrigger",
+        from: "reka-ui",
+      },
+      // TanStack Table
+      {
+        name: "useVueTable",
+        from: "@tanstack/vue-table",
+      },
+      {
+        name: "FlexRender",
+        from: "@tanstack/vue-table",
+      },
+      {
+        name: "getCoreRowModel",
+        from: "@tanstack/vue-table",
+      },
+      {
+        name: "getSortedRowModel",
+        from: "@tanstack/vue-table",
+      },
+      {
+        name: "getFilteredRowModel",
+        from: "@tanstack/vue-table",
+      },
+      {
+        name: "getPaginationRowModel",
+        from: "@tanstack/vue-table",
+      },
+    ]);
+
+    // Ensure the packages are transpiled
+    nuxt.options.build.transpile = nuxt.options.build.transpile || [];
+    nuxt.options.build.transpile.push("reka-ui", "@tanstack/vue-table");
 
     setupDevToolsUI(nuxt);
   },

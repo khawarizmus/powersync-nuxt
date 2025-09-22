@@ -46,9 +46,11 @@
     "@nuxt/kit": "^4.0.3",
     "@powersync/vue": "^0.4.0",
     "@powersync/web": "^1.25.1",
+    "@tanstack/vue-table": "^8.21.3",
     "defu": "^6.1.4",
     "destr": "^2.0.5",
     "powersync-nuxt": "link:",
+    "reka-ui": "^2.5.0",
     "sirv": "^3.0.1"
   },
   "peerDependencies": {
@@ -66,6 +68,8 @@
     "changelogen": "^0.6.2",
     "eslint": "^9.33.0",
     "nuxt": "^4.0.3",
+    "shiki": "^3.13.0",
+    "v-lazy-show": "^0.3.0",
     "vite-plugin-top-level-await": "^1.6.0",
     "vite-plugin-wasm": "^3.5.0",
     "vitepress": "2.0.0-alpha.12",
