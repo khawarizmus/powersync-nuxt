@@ -15,7 +15,7 @@
           w="10"
           h="10"
         />
-        Powersync Inspector
+        PowerSync Inspector
       </h1>
 
       <!-- Dark Mode Toggle -->

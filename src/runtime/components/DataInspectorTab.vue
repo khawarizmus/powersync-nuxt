@@ -6,40 +6,79 @@
     n-bg="base"
     flex="~ col"
     h="screen"
+    overflow="hidden"
   >
     <SplitterGroup id="splitter-group-1" class="h-full" direction="horizontal">
       <SplitterPanel
         id="splitter-group-1-panel-1"
         :min-size="20"
         :default-size="20"
-        class="border ps-3"
+        class="border flex flex-col overflow-hidden"
       >
-        <TreeRoot
-          v-if="tableRows && tableRows.length > 0"
-          v-model="selectedTable"
-          :items="tableRows"
-          :get-key="(e) => (e ? e.name : e)"
-        >
-          <TreeVirtualizer v-slot="{ item }">
+        <div class="flex-1 overflow-y-auto">
+          <TreeRoot
+            v-if="treeData && treeData.length > 0"
+            v-model="selectedEntry"
+            :items="treeData"
+            :get-key="(item) => item.name"
+            :get-children="(item) => item.children || undefined"
+            class="h-full"
+            v-slot="{ flattenItems }"
+          >
             <TreeItem
-              cursor="pointer"
-              class="w-full"
-              :value="item"
-              :level="0"
-              @select="selectTable(item.value)"
+              v-for="item in flattenItems"
+              :key="item._id"
+              v-bind="item.bind"
+              v-slot="{ isExpanded, isSelected }"
+              @select="
+                (event) => {
+                  if (item.value.type !== 'folder') {
+                    selectEntry(item.value);
+                  }
+                }
+              "
             >
               <div
-                :class="`hover:bg-gray-100 dark:hover:bg-gray-700 w-full ${
-                  selectedTable?._id === item._id
-                    ? 'bg-gray-300 dark:bg-gray-700 font-semibold'
-                    : ''
-                }`"
+                class="flex items-center gap-2 py-1 px-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-full"
+                :class="{
+                  'bg-gray-300 dark:bg-gray-700 font-semibold':
+                    isSelected && item.value.type !== 'folder',
+                  'font-medium': item.value.type === 'folder',
+                }"
+                :style="{ paddingLeft: `${item.level * 16 + 8}px` }"
               >
-                {{ item._id }}
+                <!-- Folder/Item Icon -->
+                <NIcon
+                  :icon="
+                    item.value.type === 'folder'
+                      ? isExpanded
+                        ? 'carbon:folder-open'
+                        : 'carbon:folder'
+                      : item.value.icon
+                  "
+                  class="flex-shrink-0"
+                  :class="
+                    item.value.type === 'folder'
+                      ? 'text-blue-500'
+                      : 'text-gray-500'
+                  "
+                />
+
+                <!-- Name -->
+                <span class="truncate">{{ item.value.name }}</span>
+
+                <!-- Expand/Collapse indicator for folders -->
+                <NIcon
+                  v-if="item.value.type === 'folder'"
+                  :icon="
+                    isExpanded ? 'carbon:chevron-down' : 'carbon:chevron-right'
+                  "
+                  class="flex-shrink-0 ml-auto text-gray-400"
+                />
               </div>
             </TreeItem>
-          </TreeVirtualizer>
-        </TreeRoot>
+          </TreeRoot>
+        </div>
       </SplitterPanel>
       <SplitterResizeHandle
         id="splitter-group-1-resize-handle-1"
@@ -47,12 +86,12 @@
       />
       <SplitterPanel id="splitter-group-1-panel-2" :min-size="20">
         <div
-          v-if="!selectedTable"
+          v-if="!selectedEntry"
           class="flex w-full h-full justify-center items-center align-middle"
         >
           <div text="sm gray-500" flex="~ gap-2 items-center">
             <NIcon icon="carbon:document-blank" />
-            <span>No Table Selected</span>
+            <span>No Selection</span>
           </div>
         </div>
         <SplitterGroup v-else id="splitter-group-2" direction="vertical">
@@ -113,8 +152,11 @@
             class="border flex flex-col"
           >
             <!-- Query Results Table -->
-            <div v-if="isLoading" class="flex justify-center items-center h-32">
-              <div class="text-sm text-gray-500">Executing query...</div>
+            <div
+              v-if="isLoading"
+              class="flex justify-center items-center h-full"
+            >
+              <NLoading />
             </div>
 
             <div
@@ -148,7 +190,7 @@
               <div
                 class="px-3 py-2 flex justify-between items-center bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex-shrink-0"
               >
-                <NButton n="xs" icon="carbon:play" @click="executeQuery">
+                <NButton n="xs green" icon="carbon:play" @click="executeQuery">
                   Execute Query
                 </NButton>
                 <div class="flex items-center gap-1">
@@ -269,10 +311,19 @@
 
             <div
               v-else-if="currentTableRows && currentTableRows.length === 0"
-              class="text-center py-8"
+              class="flex-1 flex flex-col overflow-hidden"
             >
-              <div class="text-gray-500 dark:text-gray-400">
-                No results found
+              <div
+                class="px-3 py-2 flex justify-between items-center bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex-shrink-0"
+              >
+                <NButton n="xs" icon="carbon:play" @click="executeQuery">
+                  Execute Query
+                </NButton>
+              </div>
+              <div class="text-center py-8">
+                <div class="text-gray-500 dark:text-gray-400">
+                  No results found
+                </div>
               </div>
             </div>
 
@@ -296,7 +347,6 @@ import {
   SplitterResizeHandle,
   TreeItem,
   TreeRoot,
-  TreeVirtualizer,
 } from "reka-ui";
 
 import {
@@ -309,10 +359,61 @@ import {
 
 import { codeToHtml } from "shiki";
 
-const { tableRows, db } = usePowerSyncInspectorDiagnostics();
+const ENTRIES_QUERY = `
+SELECT name, type 
+FROM sqlite_schema
+WHERE type IN ('table', 'view')
+ORDER BY type, name;
+`;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const selectedTable = ref<Record<string, any> | undefined>(undefined);
+const { db } = usePowerSyncInspectorDiagnostics();
+
+const entriesRows = ref<{ name: string; type: string }[] | null>(null);
+const _tableInfo = ref<any | null>(null);
+
+// Create hierarchical tree structure
+const treeData = computed(() => {
+  if (!entriesRows.value) return [];
+
+  const tables = entriesRows.value.filter((entry) => entry.type === "table");
+  const views = entriesRows.value.filter((entry) => entry.type === "view");
+
+  const treeItems = [];
+
+  if (tables.length > 0) {
+    treeItems.push({
+      name: "Tables",
+      type: "folder",
+      icon: "carbon:folder",
+      children: tables.map((table) => ({
+        ...table,
+        icon: "carbon:data-base",
+      })),
+    });
+  }
+
+  if (views.length > 0) {
+    treeItems.push({
+      name: "Views",
+      type: "folder",
+      icon: "carbon:view",
+      children: views.map((view) => ({
+        ...view,
+        icon: "carbon:data-view",
+      })),
+    });
+  }
+
+  return treeItems;
+});
+
+onMounted(async () => {
+  entriesRows.value = await db.value.getAll(ENTRIES_QUERY);
+});
+
+const selectedEntry = ref<{ name: string; type: string } | undefined>(
+  undefined
+);
 const query = ref<string>("");
 const isLoading = ref(false);
 const queryError = ref<string | null>(null);
@@ -408,9 +509,9 @@ const syncScroll = () => {
   }
 };
 
-const selectTable = (table: Record<string, any>) => {
-  selectedTable.value = table;
-  query.value = `SELECT * FROM ${selectedTable.value.name};`;
+const selectEntry = (entry: { name: string; type: string }) => {
+  selectedEntry.value = entry;
+  query.value = `SELECT * FROM ${selectedEntry.value.name};`;
   executeQuery();
 };
 
@@ -433,8 +534,8 @@ const executeQuery = async () => {
 };
 
 // Auto-execute when selected table changes
-watch(selectedTable, () => {
-  if (selectedTable.value) {
+watch(selectedEntry, () => {
+  if (selectedEntry.value) {
     executeQuery();
   }
 });
