@@ -190,32 +190,77 @@
               <div
                 class="px-3 py-2 flex justify-between items-center bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex-shrink-0"
               >
-                <NButton n="xs green" icon="carbon:play" @click="executeQuery">
-                  Execute Query
-                </NButton>
-                <div class="flex items-center gap-1">
+                <div class="flex items-center gap-3">
+                  <NButton
+                    n="xs green"
+                    icon="carbon:play"
+                    @click="executeQuery"
+                  >
+                    Execute Query
+                  </NButton>
+
                   <div class="text-xs text-gray-600 dark:text-gray-400">
                     {{ currentTableRows.length }} row{{
                       currentTableRows.length !== 1 ? "s" : ""
                     }}
                     returned
                   </div>
+                </div>
+
+                <div class="flex items-center gap-1">
                   <NButton
                     n="xs"
                     icon="carbon:chevron-left"
                     :disabled="!table.getCanPreviousPage()"
                     @click="table.previousPage()"
                   />
-                  <span class="text-xs text-gray-600 dark:text-gray-400 px-2">
-                    {{ table.getState().pagination.pageIndex + 1 }} of
-                    {{ table.getPageCount() }}
-                  </span>
+
+                  <!-- Page Jump Input -->
+                  <div class="flex items-center gap-1">
+                    <span class="text-xs text-gray-600 dark:text-gray-400"
+                      >Page</span
+                    >
+                    <NTextInput
+                      v-model="currentPageInput"
+                      n="xs"
+                      class="w-12 text-center"
+                      type="number"
+                      min="1"
+                      :max="table.getPageCount()"
+                      @blur="jumpToPage"
+                      @keydown.enter="jumpToPage"
+                    />
+                    <span class="text-xs text-gray-600 dark:text-gray-400"
+                      >of {{ table.getPageCount() }}</span
+                    >
+                  </div>
+
                   <NButton
                     n="xs"
                     icon="carbon:chevron-right"
                     :disabled="!table.getCanNextPage()"
                     @click="table.nextPage()"
                   />
+                </div>
+
+                <!-- Page Size Control -->
+                <div class="flex items-center gap-1">
+                  <span class="text-xs text-gray-600 dark:text-gray-400"
+                    >Show:</span
+                  >
+                  <NTextInput
+                    v-model="pageSizeInput"
+                    n="xs"
+                    class="w-16"
+                    type="number"
+                    min="1"
+                    max="1000"
+                    @blur="updatePageSize"
+                    @keydown.enter="updatePageSize"
+                  />
+                  <span class="text-xs text-gray-600 dark:text-gray-400"
+                    >per page</span
+                  >
                 </div>
               </div>
 
@@ -421,6 +466,10 @@ const _hasLimitOrOffset = ref(false);
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const currentTableRows = ref<any[] | null>(null);
 
+// Pagination controls
+const currentPageInput = ref<string>("1");
+const pageSizeInput = ref<string>("50");
+
 // Editor refs for scroll synchronization
 const textareaRef = ref<HTMLTextAreaElement>();
 const highlightContainer = ref<HTMLDivElement>();
@@ -508,6 +557,42 @@ const syncScroll = () => {
     highlightContainer.value.scrollLeft = textareaRef.value.scrollLeft;
   }
 };
+
+// Pagination control functions
+const jumpToPage = () => {
+  const pageNumber = Number.parseInt(currentPageInput.value, 10);
+  if (pageNumber >= 1 && pageNumber <= table.getPageCount()) {
+    table.setPageIndex(pageNumber - 1); // TanStack uses 0-based indexing
+  } else {
+    // Reset to current page if invalid
+    currentPageInput.value = String(table.getState().pagination.pageIndex + 1);
+  }
+};
+
+const updatePageSize = () => {
+  const pageSize = Number.parseInt(pageSizeInput.value, 10);
+  if (pageSize >= 1 && pageSize <= 1000) {
+    table.setPageSize(pageSize);
+  } else {
+    // Reset to current page size if invalid
+    pageSizeInput.value = String(table.getState().pagination.pageSize);
+  }
+};
+
+// Watch table state to sync inputs
+watch(
+  () => table.getState().pagination.pageIndex,
+  (newPageIndex) => {
+    currentPageInput.value = String(newPageIndex + 1);
+  }
+);
+
+watch(
+  () => table.getState().pagination.pageSize,
+  (newPageSize) => {
+    pageSizeInput.value = String(newPageSize);
+  }
+);
 
 const selectEntry = (entry: { name: string; type: string }) => {
   selectedEntry.value = entry;
