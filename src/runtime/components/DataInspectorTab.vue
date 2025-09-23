@@ -15,69 +15,95 @@
         :default-size="20"
         class="border flex flex-col overflow-hidden"
       >
-        <div class="flex-1 overflow-y-auto">
-          <TreeRoot
-            v-if="treeData && treeData.length > 0"
-            v-model="selectedEntry"
-            :items="treeData"
-            :get-key="(item) => item.name"
-            :get-children="(item) => item.children || undefined"
-            class="h-full"
-            v-slot="{ flattenItems }"
-          >
-            <TreeItem
-              v-for="item in flattenItems"
-              :key="item._id"
-              v-bind="item.bind"
-              v-slot="{ isExpanded, isSelected }"
-              @select="
-                (event) => {
-                  if (item.value.type !== 'folder') {
-                    selectEntry(item.value);
-                  }
-                }
-              "
+        <div class="flex-1 flex flex-col overflow-hidden">
+          <!-- Search Bar -->
+          <div class="p-2 border-b border-gray-200 dark:border-gray-700">
+            <NTextInput
+              v-model="searchQuery"
+              n="xs"
+              class="w-full"
+              placeholder="Search tables and views..."
+              icon="carbon:search"
+              @input="onSearchInput"
+            />
+          </div>
+
+          <!-- Tree Container -->
+          <div class="flex-1 overflow-y-auto">
+            <TreeRoot
+              v-if="filteredTreeData && filteredTreeData.length > 0"
+              v-model="selectedEntry"
+              :items="filteredTreeData"
+              :get-key="(item) => item.name"
+              :get-children="(item) => item.children || undefined"
+              class="h-full"
+              v-slot="{ flattenItems }"
+              v-model:expanded="expandedItems"
             >
-              <div
-                class="flex items-center gap-2 py-1 px-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-full"
-                :class="{
-                  'bg-gray-300 dark:bg-gray-700 font-semibold':
-                    isSelected && item.value.type !== 'folder',
-                  'font-medium': item.value.type === 'folder',
-                }"
-                :style="{ paddingLeft: `${item.level * 16 + 8}px` }"
+              <TreeItem
+                v-for="item in flattenItems"
+                :key="item._id"
+                v-bind="item.bind"
+                v-slot="{ isExpanded, isSelected }"
+                @select="
+                  (event) => {
+                    if (item.value.type !== 'folder') {
+                      selectEntry(item.value);
+                    }
+                  }
+                "
               >
-                <!-- Folder/Item Icon -->
-                <NIcon
-                  :icon="
-                    item.value.type === 'folder'
-                      ? isExpanded
-                        ? 'carbon:folder-open'
-                        : 'carbon:folder'
-                      : item.value.icon
-                  "
-                  class="flex-shrink-0"
-                  :class="
-                    item.value.type === 'folder'
-                      ? 'text-blue-500'
-                      : 'text-gray-500'
-                  "
-                />
+                <div
+                  class="flex items-center gap-2 py-1 px-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-full"
+                  :class="{
+                    'bg-gray-300 dark:bg-gray-700 font-semibold':
+                      isSelected && item.value.type !== 'folder',
+                    'font-medium': item.value.type === 'folder',
+                  }"
+                  :style="{ paddingLeft: `${item.level * 16 + 8}px` }"
+                >
+                  <!-- Folder/Item Icon -->
+                  <NIcon
+                    :icon="
+                      item.value.type === 'folder'
+                        ? isExpanded
+                          ? 'carbon:folder-open'
+                          : 'carbon:folder'
+                        : item.value.icon
+                    "
+                    class="flex-shrink-0"
+                    :class="
+                      item.value.type === 'folder'
+                        ? 'text-blue-500'
+                        : 'text-gray-500'
+                    "
+                  />
 
-                <!-- Name -->
-                <span class="truncate">{{ item.value.name }}</span>
+                  <!-- Name -->
+                  <span class="truncate">{{ item.value.name }}</span>
 
-                <!-- Expand/Collapse indicator for folders -->
-                <NIcon
-                  v-if="item.value.type === 'folder'"
-                  :icon="
-                    isExpanded ? 'carbon:chevron-down' : 'carbon:chevron-right'
-                  "
-                  class="flex-shrink-0 ml-auto text-gray-400"
-                />
-              </div>
-            </TreeItem>
-          </TreeRoot>
+                  <!-- Expand/Collapse indicator for folders -->
+                  <NIcon
+                    v-if="item.value.type === 'folder'"
+                    :icon="
+                      isExpanded
+                        ? 'carbon:chevron-down'
+                        : 'carbon:chevron-right'
+                    "
+                    class="flex-shrink-0 ml-auto text-gray-400"
+                  />
+                </div>
+              </TreeItem>
+            </TreeRoot>
+
+            <!-- No Results Message -->
+            <div
+              v-else-if="searchQuery && filteredTreeData.length === 0"
+              class="flex-1 flex items-center justify-center text-gray-500 dark:text-gray-400 text-sm"
+            >
+              No tables or views found for "{{ searchQuery }}"
+            </div>
+          </div>
         </div>
       </SplitterPanel>
       <SplitterResizeHandle
@@ -403,6 +429,7 @@ import {
 } from "@tanstack/vue-table";
 
 import { codeToHtml } from "shiki";
+import Fuse from "fuse.js";
 
 const ENTRIES_QUERY = `
 SELECT name, type 
@@ -414,6 +441,7 @@ ORDER BY type, name;
 const { db } = usePowerSyncInspectorDiagnostics();
 
 const entriesRows = ref<{ name: string; type: string }[] | null>(null);
+const expandedItems = ref<string[]>([]);
 const _tableInfo = ref<any | null>(null);
 
 // Create hierarchical tree structure
@@ -452,9 +480,78 @@ const treeData = computed(() => {
   return treeItems;
 });
 
+// Initialize Fuse.js for fuzzy search
+const initializeFuse = () => {
+  if (!entriesRows.value) return;
+
+  const fuseOptions = {
+    keys: ["name"],
+    threshold: 0.3, // Adjust fuzzy search sensitivity (0 = exact, 1 = very fuzzy)
+    includeScore: true,
+    includeMatches: true,
+  };
+
+  fuse.value = new Fuse(entriesRows.value, fuseOptions);
+};
+
+// Filtered tree data based on search
+const filteredTreeData = computed(() => {
+  if (!searchQuery.value || !fuse.value) {
+    return treeData.value;
+  }
+
+  // Perform fuzzy search
+  const searchResults = fuse.value.search(searchQuery.value);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const filteredEntries = searchResults.map((result: any) => result.item);
+
+  // Rebuild tree structure with filtered results
+  const tables = filteredEntries.filter((entry) => entry.type === "table");
+  const views = filteredEntries.filter((entry) => entry.type === "view");
+
+  const filteredTreeItems = [];
+
+  if (tables.length > 0) {
+    filteredTreeItems.push({
+      name: "Tables",
+      type: "folder",
+      icon: "carbon:folder",
+      children: tables.map((table) => ({
+        ...table,
+        icon: "carbon:data-base",
+      })),
+    });
+  }
+
+  if (views.length > 0) {
+    filteredTreeItems.push({
+      name: "Views",
+      type: "folder",
+      icon: "carbon:view",
+      children: views.map((view) => ({
+        ...view,
+        icon: "carbon:data-view",
+      })),
+    });
+  }
+
+  return filteredTreeItems;
+});
+
 onMounted(async () => {
   entriesRows.value = await db.value.getAll(ENTRIES_QUERY);
+  initializeFuse();
 });
+
+// Re-initialize Fuse when entries change
+watch(entriesRows, () => {
+  initializeFuse();
+});
+
+// Search input handler
+const onSearchInput = () => {
+  expandedItems.value = ["Tables", "Views"];
+};
 
 const selectedEntry = ref<{ name: string; type: string } | undefined>(
   undefined
@@ -469,6 +566,11 @@ const currentTableRows = ref<any[] | null>(null);
 // Pagination controls
 const currentPageInput = ref<string>("1");
 const pageSizeInput = ref<string>("50");
+
+// Search functionality
+const searchQuery = ref<string>("");
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const fuse = ref<Fuse<any>>();
 
 // Editor refs for scroll synchronization
 const textareaRef = ref<HTMLTextAreaElement>();
