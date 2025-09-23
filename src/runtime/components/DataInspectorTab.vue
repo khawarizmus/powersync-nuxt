@@ -574,27 +574,14 @@ watch(selectedEntry, () => {
   margin: 0;
 }
 
-.syntax-highlight-bg code .line {
-  display: block;
-  min-height: 1.5em;
-  padding-left: 3rem;
-}
-
 .syntax-highlight-bg code .line::before {
   content: counter(step);
   counter-increment: step;
-  position: absolute;
-  left: 0;
-  width: 2.5rem;
-  margin-top: 0;
-  margin-right: 0;
+  width: 1rem;
+  margin-right: 1.5rem;
   display: inline-block;
   text-align: right;
   color: rgba(115, 138, 148, 0.4);
-  font-family: inherit;
-  font-size: inherit;
-  line-height: inherit;
-  padding-right: 0.5rem;
 }
 
 /* Textarea styling to match exactly */
@@ -604,13 +591,14 @@ watch(selectedEntry, () => {
   line-height: 1.5 !important;
   padding: 0 !important;
   margin: 0 !important;
-  padding-left: 3rem !important;
+  padding-left: 2.5rem !important;
+  padding-top: 0.25rem !important;
   tab-size: 2;
   white-space: pre;
   word-wrap: normal;
   overflow-wrap: normal;
   scrollbar-width: thin;
-  padding-top: 0.25rem !important;
+  box-sizing: border-box;
 }
 
 /* Cursor visibility - make it more prominent */
