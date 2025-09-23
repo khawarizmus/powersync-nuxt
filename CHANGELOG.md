@@ -1,6 +1,27 @@
 # Changelog
 
 
+## v1.3.0
+
+[compare changes](https://github.com/khawarizmus/powersync-nuxt/compare/v1.2.12...v1.3.0)
+
+### 🚀 Enhancements
+
+- Integrate Reka UI and TanStack Table components, enhance Data Inspector layout with dark mode toggle ([07e2201](https://github.com/khawarizmus/powersync-nuxt/commit/07e2201))
+- Added table and views exploration ([9eb8ccf](https://github.com/khawarizmus/powersync-nuxt/commit/9eb8ccf))
+
+### 💅 Refactors
+
+- Refactored the page to use tabs and a layout ([c7f2dd3](https://github.com/khawarizmus/powersync-nuxt/commit/c7f2dd3))
+
+### 🏡 Chore
+
+- **release:** V1.2.12 ([270fe45](https://github.com/khawarizmus/powersync-nuxt/commit/270fe45))
+
+### ❤️ Contributors
+
+- Khawarizmus <b.afatah@yahoo.com>
+
 ## v1.2.12
 
 [compare changes](https://github.com/khawarizmus/powersync-nuxt/compare/v1.2.11...v1.2.12)
