@@ -113,6 +113,10 @@
 import { ref, onMounted, computed } from 'vue'
 import { useTimeAgo } from '@vueuse/core'
 import { definePageMeta, usePowerSyncInspectorDiagnostics } from '#imports'
+import SyncStatusTab from '../components/SyncStatusTab.vue'
+import DataInspectorTab from '../components/DataInspectorTab.vue'
+import ConfigInspectorTab from '../components/ConfigInspectorTab.vue'
+import LogsTab from '../components/LogsTab.vue'
 
 definePageMeta({
   layout: 'powersync-inspector-layout',
@@ -148,3 +152,12 @@ const lastSyncedFormatted = computed(() =>
   useTimeAgo(new Date(lastSyncedAt.value)),
 )
 </script>
+
+<style>
+html,
+body,
+#__nuxt,
+#nuxt-test {
+  background-color: transparent;
+}
+</style>
