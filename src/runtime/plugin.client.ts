@@ -1,9 +1,9 @@
-import { defineNuxtPlugin, useRuntimeConfig } from "#app";
+import { defineNuxtPlugin, useRuntimeConfig } from '#app'
 
 export default defineNuxtPlugin((nuxtApp) => {
   // Expose PowerSync module options globally
-  const runtimeConfig = useRuntimeConfig();
+  const runtimeConfig = useRuntimeConfig()
 
-  nuxtApp.vueApp.config.globalProperties.$powerSyncModuleOptions =
-    runtimeConfig.public.powerSyncModuleOptions;
-});
+  nuxtApp.vueApp.config.globalProperties.$powerSyncModuleOptions
+    = runtimeConfig.public.powerSyncModuleOptions
+})

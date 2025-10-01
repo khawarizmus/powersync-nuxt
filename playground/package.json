@@ -1,4 +1,12 @@
 {
   "private": true,
-  "name": "powersync-nuxt-playground"
+  "name": "powersync-nuxt-playground",
+  "dependencies": {
+    "@nuxt/ui": "^4.0.0",
+    "@nuxtjs/supabase": "^2.0.0"
+  },
+  "devDependencies": {
+    "@nuxt/devtools": "^1.0.6",
+    "@nuxt/eslint": "^1.9.0"
+  }
 }

@@ -1,8 +1,28 @@
 <template>
-  <div>
-    Nuxt module playground!
-  </div>
+  <UApp>
+    <NuxtLayout>
+      <NuxtPage />
+    </NuxtLayout>
+  </UApp>
 </template>
 
-<script setup>
+<script setup lang="ts">
+useHead({
+  meta: [{ name: 'viewport', content: 'width=device-width, initial-scale=1' }],
+  link: [{ rel: 'icon', href: '/favicon.ico' }],
+  htmlAttrs: {
+    lang: 'en',
+  },
+})
+
+const title = 'PowerSync Playground'
+const description
+  = 'Demo of a simple todo list app using PowerSync and Supabase.'
+
+useSeoMeta({
+  title,
+  ogTitle: title,
+  description,
+  ogDescription: description,
+})
 </script>

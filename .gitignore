@@ -26,6 +26,10 @@ dist
 
 # Env
 .env
+.envrc
+!.envrc.template
+.env.*
+!.env.template
 
 # Testing
 reports

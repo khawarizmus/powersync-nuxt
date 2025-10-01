@@ -27,7 +27,7 @@
   ],
   "scripts": {
     "prepack": "nuxi prepare playground && nuxt-module-build build",
-    "dev": "nuxi dev playground --port 3001",
+    "dev": "nuxi dev playground",
     "play:prod": "npm run prepack && nuxi dev playground",
     "release": "npm run prepack && changelogen --release && npm publish && git push --follow-tags",
     "release:strict": "npm run lint && npm run test && npm run prepack && changelogen --release && npm publish && git push --follow-tags",
@@ -41,41 +41,39 @@
   "dependencies": {
     "@iconify-json/carbon": "^1.2.13",
     "@journeyapps/wa-sqlite": "^1.2.6",
-    "@nuxt/devtools-kit": "^2.6.2",
-    "@nuxt/devtools-ui-kit": "^2.6.2",
-    "@nuxt/kit": "^4.0.3",
     "@powersync/vue": "^0.4.0",
     "@powersync/web": "^1.25.1",
     "@tanstack/vue-table": "^8.21.3",
     "defu": "^6.1.4",
     "destr": "^2.0.5",
-    "powersync-nuxt": "link:",
     "reka-ui": "^2.5.0",
+    "shiki": "^3.13.0",
     "sirv": "^3.0.1"
   },
   "peerDependencies": {
     "@journeyapps/wa-sqlite": "^1.2.6",
     "@powersync/vue": "^0.4.0",
-    "@powersync/web": "^1.25.1",
-    "nuxt": "^4.0.3"
+    "@powersync/web": "^1.25.1"
   },
   "devDependencies": {
+    "@nuxt/devtools-kit": "^2.6.2",
+    "@nuxt/devtools-ui-kit": "^2.6.2",
+    "@nuxt/kit": "^4.0.3",
     "@nuxt/devtools": "^2.6.2",
     "@nuxt/eslint-config": "^1.9.0",
     "@nuxt/module-builder": "^1.0.2",
-    "@nuxt/schema": "^4.0.3",
+    "@nuxt/schema": "^4.1.2",
     "@nuxt/test-utils": "^3.19.2",
     "changelogen": "^0.6.2",
     "eslint": "^9.33.0",
-    "nuxt": "^4.0.3",
-    "shiki": "^3.13.0",
+    "nuxt": "^4.1.2",
     "v-lazy-show": "^0.3.0",
     "vite-plugin-top-level-await": "^1.6.0",
     "vite-plugin-wasm": "^3.5.0",
     "vitepress": "2.0.0-alpha.12",
     "vitest": "^3.2.4",
     "vue": "^3.5.20",
-    "vue-tsc": "^3.0.6"
+    "vue-tsc": "^3.0.8"
   },
   "packageManager": "pnpm@10.12.1"
 }

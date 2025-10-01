@@ -1,22 +1,26 @@
-import wasm from "vite-plugin-wasm";
-import topLevelAwait from "vite-plugin-top-level-await";
+import wasm from 'vite-plugin-wasm'
+import topLevelAwait from 'vite-plugin-top-level-await'
 
 export default defineNuxtConfig({
+
+  modules: [
+    '../src/module',
+    '@nuxt/eslint',
+    '@nuxt/ui',
+    '@nuxtjs/supabase',
+  ],
   ssr: false,
 
   devtools: {
     enabled: true,
   },
 
-  watch: ["../src/*"],
+  css: ['~/assets/css/main.css'],
 
-  modules: ["../src/module"],
+  // enable hot reloading when we make changes to our module
+  watch: ['../src/*', './**/*'],
 
-  powersync: {
-    defaultConnectionParams: {
-      // add the default connection params
-    },
-  },
+  compatibilityDate: '2024-07-05',
 
   vite: {
     server: {
@@ -28,14 +32,43 @@ export default defineNuxtConfig({
 
     plugins: [topLevelAwait()],
     optimizeDeps: {
-      exclude: ["@journeyapps/wa-sqlite", "@powersync/web"],
-      include: ["@powersync/web > js-logger"], // <-- Include `js-logger` when it isn't installed and imported.
+      exclude: ['@journeyapps/wa-sqlite', '@powersync/web'],
+      include: ['@powersync/web > js-logger'], // <-- Include `js-logger` when it isn't installed and imported.
     },
     worker: {
-      format: "es",
+      format: 'es',
       plugins: () => [wasm(), topLevelAwait()],
     },
   },
 
-  compatibilityDate: "2024-08-21",
-});
+  eslint: {
+    config: {
+      stylistic: true,
+    },
+  },
+
+  powersync: {
+    defaultConnectionParams: {
+      // add the default connection params
+    },
+  },
+
+  supabase: {
+    url: process.env.NUXT_PUBLIC_SUPABASE_URL,
+    key: process.env.NUXT_PUBLIC_SUPABASE_ANON_KEY,
+    redirectOptions: {
+      login: '/login',
+      callback: '/confirm',
+      // include: ['/protected'],
+      exclude: ['/unprotected', '/public/*'],
+    },
+  },
+
+  unocss: {
+    autoImport: false,
+    preflight: true,
+    icons: true,
+    wind4: true,
+    attributify: true,
+  },
+})

@@ -1,11 +1,20 @@
-import { createConfigForNuxt } from "@nuxt/eslint-config/flat";
+// @ts-check
+import { createConfigForNuxt } from '@nuxt/eslint-config/flat'
 
 export default createConfigForNuxt({
   features: {
     tooling: true,
-    stylistic: false,
+    stylistic: true,
   },
   dirs: {
-    root: ["", "playground"],
+    src: [
+      './playground',
+      './demo',
+    ],
   },
-});
+}).append({
+  rules: {
+    'vue/multi-word-component-names': 'off',
+    '@typescript-eslint/no-explicit-any': 'off',
+  },
+})
