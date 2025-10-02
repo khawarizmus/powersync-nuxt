@@ -86,6 +86,11 @@ export default defineNuxtModule<PowerSyncModuleOptions>({
       ),
     })
 
+    addImports({
+      name: 'usePowerSyncKysely',
+      from: resolver.resolve('./runtime/composables/usePowerSyncKysely'),
+    })
+
     // From the runtime directory
     addComponentsDir({
       path: resolver.resolve('runtime/components'),
