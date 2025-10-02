@@ -4,45 +4,31 @@ import type { Database, TaskRecord } from '~/powersync/AppSchema'
 const client = useSupabaseClient()
 const user = asyncComputed(async () => await client.auth.getUser().then(res => res.data.user))
 const toast = useToast()
+const powerSync = usePowerSync()
 
 const db = usePowerSyncKysely<Database>()
 
-console.log('PowerSync DB', db)
-
-const taskQuery = db.selectFrom('tasks').selectAll().where('user_id', '=', user.value?.id ?? '').orderBy('created_at')
+const taskQuery = computed(() => db.selectFrom('tasks')
+  .where('user_id', '=', user.value?.id ?? '')
+  .orderBy('created_at')
+  .selectAll(),
+)
 
 const { data: tasks, isLoading } = await useQuery(taskQuery)
 
-const tasksFromServer = ref()
-const isModalOpen = ref(false)
-const loading = ref(false)
 const newTask = ref('')
-
-// const { data: tasks } = await useAsyncData(
-//   'tasks',
-//   async () => {
-//     const { data } = await client
-//       .from('tasks')
-//       .select('*')
-//       .eq('user', user.value!.id)
-//       .order('created_at')
-
-//     return data ?? []
-//   },
-//   { default: () => [] },
-// )
 
 async function addTask() {
   if (newTask.value.trim().length === 0) return
-
-  loading.value = true
   try {
-    await db.insertInto('tasks').values({
-      user_id: user.value!.id,
-      description: newTask.value,
-      completed: 0,
-      id: crypto.randomUUID(),
-    }).execute()
+    if (user.value) {
+      await db.insertInto('tasks').values({
+        user_id: user.value.id,
+        description: newTask.value,
+        completed: 0,
+        id: crypto.randomUUID(),
+      }).execute()
+    }
   }
   catch (error: any) {
     toast.add({
@@ -52,13 +38,12 @@ async function addTask() {
     })
   }
   newTask.value = ''
-  loading.value = false
 }
 
 const completeTask = async (
   task: TaskRecord,
 ) => {
-  await db.updateTable('tasks').set({ completed: task.completed }).where('id', '=', task.id).execute()
+  await db.updateTable('tasks').set({ completed: task.completed, completed_at: task.completed ? new Date().toISOString() : null }).where('id', '=', task.id).execute()
 }
 
 const removeTask = async (
@@ -66,16 +51,6 @@ const removeTask = async (
 ) => {
   await db.deleteFrom('tasks').where('id', '=', task.id).execute()
 }
-
-// const fetchTasksFromServerRoute = async () => {
-//   const { data } = await useFetch('/api/tasks', {
-//     headers: useRequestHeaders(['cookie']),
-//     key: 'tasks-from-server',
-//   })
-
-//   tasksFromServer.value = data
-//   isModalOpen.value = true
-// }
 
 const links = ref([
   {
@@ -94,9 +69,9 @@ const links = ref([
   },
 ])
 
-const refreshTasks = async () => {
-  //
-}
+// const refreshTasks = async () => {
+//   await powerSync.value.disconnectAndClear()
+// }
 </script>
 
 <template>
@@ -112,7 +87,7 @@ const refreshTasks = async () => {
           <div class="flex gap-2">
             <UInput
               v-model="newTask"
-              :loading="loading"
+              :loading="isLoading"
               class="w-full"
               size="xl"
               variant="subtle"
@@ -123,7 +98,7 @@ const refreshTasks = async () => {
             <UButton
               icon="i-lucide-plus"
               trailing
-              :loading="loading"
+              :loading="isLoading"
               @click="addTask"
             >
               Add
@@ -164,23 +139,17 @@ const refreshTasks = async () => {
                 </li>
               </ul>
             </UCard>
-            <div class="flex justify-end mt-4">
+            <!-- <div class="flex justify-end mt-4">
               <UButton
-                label="Fetch tasks from server route"
+                label="Clear & Re-sync"
                 color="neutral"
                 variant="link"
                 @click="refreshTasks()"
               />
-            </div>
+            </div> -->
           </div>
         </div>
       </div>
     </UPageSection>
-
-    <UModal v-model:open="isModalOpen">
-      <template #content>
-        <pre>{{ tasksFromServer }}</pre>
-      </template>
-    </UModal>
   </UContainer>
 </template>

@@ -1,5 +1,7 @@
 import { column, Schema, Table } from '@powersync/web'
 
+const { diagnosticsSchema } = usePowerSyncInspector()
+
 export const TASKS_TABLE = 'tasks'
 
 const tasks = new Table(
@@ -16,6 +18,11 @@ const tasks = new Table(
 export const AppSchema = new Schema({
   tasks,
 })
+
+export const AppSchemaWithDiagnostics = new Schema([
+  ...AppSchema.tables,
+  ...diagnosticsSchema.tables,
+])
 
 export type Database = (typeof AppSchema)['types']
 export type TaskRecord = Database['tasks']
