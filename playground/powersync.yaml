@@ -3,21 +3,20 @@ replication:
   connections:
     - type: postgresql
       uri: !env PS_POSTGRESQL_URI
-      sslmode: disable
+      # sslmode: disable
+      sslmode: verify-full
+      debug_api: true
 
 storage:
   type: postgresql
   uri: !env PS_POSTGRESQL_URI
-  sslmode: disable
-
-port: 8080
+  # sslmode: disable
+  sslmode: verify-full
 
 sync_rules:
-  content: |
-    bucket_definitions:
-      global:
-        data:
-          - SELECT * FROM counters
+  path: ./sync-rules.yaml
+
+port: !env PS_PORT
 
 client_auth:
   supabase: true

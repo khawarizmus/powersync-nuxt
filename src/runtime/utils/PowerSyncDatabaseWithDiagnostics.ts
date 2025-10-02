@@ -7,64 +7,68 @@ import {
   type RequiredAdditionalConnectionOptions,
   type StreamingSyncImplementation,
   type WebPowerSyncDatabaseOptions,
-} from "@powersync/web";
-import { RecordingStorageAdapter } from "./RecordingStorageAdapter";
-import type { DynamicSchemaManager } from "./DynamicSchemaManager";
-import { usePowerSyncInspector } from "../composables/usePowerSyncInspector";
-import { ref, type Ref } from "vue";
+} from '@powersync/web'
+import { RecordingStorageAdapter } from './RecordingStorageAdapter'
+import type { DynamicSchemaManager } from './DynamicSchemaManager'
+import { usePowerSyncInspector } from '../composables/usePowerSyncInspector'
+import { useDiagnosticsLogger } from '../composables/useDiagnosticsLogger'
+import { ref, type Ref } from 'vue'
 
 export class PowerSyncDatabaseWithDiagnostics extends PowerSyncDatabase {
-  private schemaManager!: DynamicSchemaManager;
+  private schemaManager!: DynamicSchemaManager
 
   constructor(options: WebPowerSyncDatabaseOptions) {
-    const { getCurrentSchemaManager } = usePowerSyncInspector();
+    const logger = useDiagnosticsLogger()
+    const { getCurrentSchemaManager } = usePowerSyncInspector()
     // Create schema manager before calling super
-    const currentSchemaManager = getCurrentSchemaManager();
+    const currentSchemaManager = getCurrentSchemaManager()
 
     // override settings to make the instance work better with multitab since the devtools will be open at the same time
     options.flags = {
       ...options.flags,
       enableMultiTabs: true,
       broadcastLogs: true, // enable log broadcasting for better diagnostics
-    };
+    }
     // @ts-expect-error - type error because we are forcing the vfs to be the OPFSCoopSyncVFS
-    options.vfs = WASQLiteVFS.OPFSCoopSyncVFS;
-    super(options);
+    options.vfs = WASQLiteVFS.OPFSCoopSyncVFS
+    // override logger to use the logger from the utils/Logger.ts file
+    options.logger = logger
+    super(options)
 
     // Set instance property and clear global
-    this.schemaManager = currentSchemaManager;
+    this.schemaManager = currentSchemaManager
   }
 
   protected override generateBucketStorageAdapter() {
-    const { getCurrentSchemaManager } = usePowerSyncInspector();
+    const { getCurrentSchemaManager } = usePowerSyncInspector()
 
-    const currentSchemaManager = getCurrentSchemaManager();
-    const schemaManager = currentSchemaManager || this.schemaManager;
+    const currentSchemaManager = getCurrentSchemaManager()
+    const schemaManager = currentSchemaManager || this.schemaManager
 
     const adapter = new RecordingStorageAdapter(
       ref(this) as Ref<PowerSyncDatabase>,
-      ref(schemaManager) as Ref<DynamicSchemaManager>
-    );
+      ref(schemaManager) as Ref<DynamicSchemaManager>,
+    )
 
-    return adapter;
+    return adapter
   }
 
   protected override generateSyncStreamImplementation(
     connector: PowerSyncBackendConnector,
-    options: RequiredAdditionalConnectionOptions
+    options: RequiredAdditionalConnectionOptions,
   ): StreamingSyncImplementation {
     return new WebStreamingSyncImplementation({
       adapter: this.bucketStorageAdapter, // This should be our RecordingStorageAdapter
       remote: new WebRemote(connector),
       uploadCrud: async () => {
-        await this.waitForReady();
-        await connector.uploadData(this);
+        await this.waitForReady()
+        await connector.uploadData(this)
       },
       identifier:
-        "dbFilename" in this.options.database
+        'dbFilename' in this.options.database
           ? this.options.database.dbFilename
-          : "diagnostics-sync",
+          : 'diagnostics-sync',
       ...options,
-    });
+    })
   }
 }

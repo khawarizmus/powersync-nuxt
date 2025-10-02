@@ -1,30 +1,29 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { usePowerSync, useStatus } from "@powersync/vue";
+import { usePowerSync, useStatus } from '@powersync/vue'
 import type {
   PowerSyncBackendConnector,
   UploadQueueStats,
-} from "@powersync/web";
-import { ref, computed, readonly, onMounted, onUnmounted } from "vue";
-import { computedAsync } from "@vueuse/core";
-import { usePowerSyncInspector } from "./usePowerSyncInspector";
-import { useNuxtApp } from "#imports";
+} from '@powersync/web'
+import { ref, computed, readonly, onMounted, onUnmounted } from 'vue'
+import { computedAsync } from '@vueuse/core'
+import { usePowerSyncInspector } from './usePowerSyncInspector'
+import { useNuxtApp } from '#imports'
 
 // types
-type AbstractPowerSyncBackendConnector =
-  PowerSyncBackendConnector extends infer T ? T : never;
+type AbstractPowerSyncBackendConnector
+  = PowerSyncBackendConnector extends infer T ? T : never
 
-type JSONValue =
-  | string
-  | number
-  | boolean
-  | null
-  | undefined
-  | JSONObject
-  | JSONArray;
+type JSONValue
+  = | string
+    | number
+    | boolean
+    | null
+    | undefined
+    | JSONObject
+    | JSONArray
 interface JSONObject {
-  [key: string]: JSONValue;
+  [key: string]: JSONValue
 }
-type JSONArray = JSONValue[];
+type JSONArray = JSONValue[]
 
 // queries
 const BUCKETS_QUERY = `
@@ -61,11 +60,11 @@ SELECT
   local.downloading
 FROM local_bucket_data local
 LEFT JOIN ps_buckets ON ps_buckets.name = local.id
-LEFT JOIN oplog_stats stats ON stats.bucket_id = ps_buckets.id`;
+LEFT JOIN oplog_stats stats ON stats.bucket_id = ps_buckets.id`
 
 const TABLES_QUERY = `
 SELECT row_type as name, count() as count, sum(length(data)) as size FROM ps_oplog GROUP BY row_type
-`;
+`
 
 const BUCKETS_QUERY_FAST = `
 SELECT
@@ -78,59 +77,59 @@ SELECT
   local.downloaded_operations,
   local.total_operations,
   local.downloading
-FROM local_bucket_data local`;
+FROM local_bucket_data local`
 
 function formatBytes(bytes: number, decimals = 2) {
-  if (!+bytes) return "0 Bytes";
+  if (!+bytes) return '0 Bytes'
 
-  const k = 1024;
-  const dm = decimals < 0 ? 0 : decimals;
+  const k = 1024
+  const dm = decimals < 0 ? 0 : decimals
   const sizes = [
-    "Bytes",
-    "KiB",
-    "MiB",
-    "GiB",
-    "TiB",
-    "PiB",
-    "EiB",
-    "ZiB",
-    "YiB",
-  ];
+    'Bytes',
+    'KiB',
+    'MiB',
+    'GiB',
+    'TiB',
+    'PiB',
+    'EiB',
+    'ZiB',
+    'YiB',
+  ]
 
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
 
   return `${Number.parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${
     sizes[i]
-  }`;
+  }`
 }
 
 export function usePowerSyncInspectorDiagnostics() {
-  const db = usePowerSync();
-  const syncStatus = useStatus();
-  const { getCurrentSchemaManager } = usePowerSyncInspector();
-  const nuxtApp = useNuxtApp();
+  const db = usePowerSync()
+  const syncStatus = useStatus()
+  const { getCurrentSchemaManager } = usePowerSyncInspector()
+  const nuxtApp = useNuxtApp()
 
   // reactive state
-  const isDiagnosticSchemaSetup = ref(true);
-  const hasSynced = ref(syncStatus.value?.hasSynced || false);
-  const isConnected = ref(syncStatus.value?.connected || false);
-  const isSyncing = ref(false);
+  const isDiagnosticSchemaSetup = ref(true)
+  const hasSynced = ref(syncStatus.value?.hasSynced || false)
+  const isConnected = ref(syncStatus.value?.connected || false)
+  const isSyncing = ref(false)
   const isDownloading = ref(
-    syncStatus.value?.dataFlowStatus.downloading || false
-  );
-  const isUploading = ref(syncStatus.value?.dataFlowStatus.uploading || false);
-  const lastSyncedAt = ref(syncStatus.value?.lastSyncedAt || "");
-  const uploadError = ref(syncStatus.value?.dataFlowStatus.uploadError || null);
+    syncStatus.value?.dataFlowStatus.downloading || false,
+  )
+  const isUploading = ref(syncStatus.value?.dataFlowStatus.uploading || false)
+  const lastSyncedAt = ref(syncStatus.value?.lastSyncedAt || '')
+  const uploadError = ref(syncStatus.value?.dataFlowStatus.uploadError || null)
   const downloadError = ref(
-    syncStatus.value?.dataFlowStatus.downloadError || null
-  );
+    syncStatus.value?.dataFlowStatus.downloadError || null,
+  )
   const downloadProgressDetails = ref(
-    syncStatus.value?.dataFlowStatus.downloadProgress || null
-  );
-  const bucketRows = ref<null | any[]>(null);
-  const tableRows = ref<null | any[]>(null);
+    syncStatus.value?.dataFlowStatus.downloadProgress || null,
+  )
+  const bucketRows = ref<null | any[]>(null)
+  const tableRows = ref<null | any[]>(null)
 
-  const uploadQueueStats = ref<null | UploadQueueStats>(null);
+  const uploadQueueStats = ref<null | UploadQueueStats>(null)
 
   // computed state
   const totals = computed(() => ({
@@ -139,178 +138,185 @@ export function usePowerSyncInspectorDiagnostics() {
       bucketRows.value?.reduce((total, row) => total + row.row_count, 0) ?? 0,
     downloaded_operations: bucketRows.value?.reduce(
       (total, row) => total + row.downloaded_operations,
-      0
+      0,
     ),
     total_operations:
       bucketRows.value?.reduce(
         (total, row) => total + row.total_operations,
-        0
+        0,
       ) ?? 0,
     data_size: formatBytes(
-      bucketRows.value?.reduce((total, row) => total + row.data_size, 0) ?? 0
+      bucketRows.value?.reduce((total, row) => total + row.data_size, 0) ?? 0,
     ),
     metadata_size: formatBytes(
-      bucketRows.value?.reduce((total, row) => total + row.metadata_size, 0) ??
-        0
+      bucketRows.value?.reduce((total, row) => total + row.metadata_size, 0)
+      ?? 0,
     ),
     download_size: formatBytes(
-      bucketRows.value?.reduce((total, row) => total + row.download_size, 0) ??
-        0
+      bucketRows.value?.reduce((total, row) => total + row.download_size, 0)
+      ?? 0,
     ),
-  }));
+  }))
 
   const connector = computed<AbstractPowerSyncBackendConnector | null>(() => {
-    const connector =
-      nuxtApp.vueApp.config.globalProperties.$inspectorPowerSyncConnector;
-    return connector as AbstractPowerSyncBackendConnector | null;
-  });
+    const connector
+      = nuxtApp.vueApp.config.globalProperties.$inspectorPowerSyncConnector
+    return connector as AbstractPowerSyncBackendConnector | null
+  })
   const moduleOptions = computed(() => {
-    const options =
-      nuxtApp.vueApp.config.globalProperties.$inspectorPowerSyncModuleOptions;
-    return options;
-  });
+    const options
+      = nuxtApp.vueApp.config.globalProperties.$inspectorPowerSyncModuleOptions
+    return options
+  })
 
   const userID = computedAsync(async () => {
     try {
       // @ts-expect-error - connector to be double ref or something
-      const token = (await connector.value?.value.fetchCredentials())?.token;
+      const token = (await connector.value?.value.fetchCredentials())?.token
 
-      if (!token) return null;
+      if (!token) return null
 
-      const [_head, body, _signature] = token.split(".");
-      const payload = JSON.parse(atob(body ?? ""));
-      return payload.sub;
-    } catch {
-      return null;
+      const [_head, body, _signature] = token.split('.')
+      const payload = JSON.parse(atob(body ?? ''))
+      return payload.sub
     }
-  });
+    catch {
+      return null
+    }
+  })
 
   const totalDownloadProgress = computed(() => {
     if (!hasSynced.value || isSyncing.value) {
       return (
         (syncStatus.value?.downloadProgress?.downloadedFraction ?? 0) * 100
-      ).toFixed(1);
+      ).toFixed(1)
     }
-    return 100;
-  });
+    return 100
+  })
 
   const uploadQueueSize = computed(() =>
-    formatBytes(uploadQueueStats.value?.size ?? 0)
-  );
-  const uploadQueueCount = computed(() => uploadQueueStats.value?.count ?? 0);
+    formatBytes(uploadQueueStats.value?.size ?? 0),
+  )
+  const uploadQueueCount = computed(() => uploadQueueStats.value?.count ?? 0)
 
   // functions
   const clearData = () => {
-    db.value.syncStreamImplementation?.disconnect();
-    db.value?.disconnectAndClear();
-    const schemaManager = getCurrentSchemaManager();
-    schemaManager.clear();
-    schemaManager.refreshSchema(db.value.database);
-    console.log("connecting to db");
+    db.value.syncStreamImplementation?.disconnect()
+    db.value?.disconnectAndClear()
+    const schemaManager = getCurrentSchemaManager()
+    schemaManager.clear()
+    schemaManager.refreshSchema(db.value.database)
+    console.log('connecting to db')
     db.value.connect(
       connector.value!,
-      moduleOptions.value?.defaultConnectionParams
-    );
-  };
+      moduleOptions.value?.defaultConnectionParams,
+    )
+  }
 
   async function refreshState() {
     if (db.value) {
       const { synced_at } = await db.value.get<{ synced_at: string | null }>(
-        "SELECT powersync_last_synced_at() as synced_at"
-      );
+        'SELECT powersync_last_synced_at() as synced_at',
+      )
 
-      uploadQueueStats.value = await db.value?.getUploadQueueStats(true);
+      uploadQueueStats.value = await db.value?.getUploadQueueStats(true)
 
       if (synced_at != null && !syncStatus.value?.dataFlowStatus.downloading) {
         // These are potentially expensive queries - do not run during initial sync
-        bucketRows.value = await db.value.getAll(BUCKETS_QUERY);
-        tableRows.value = await db.value.getAll(TABLES_QUERY);
-      } else if (synced_at != null) {
+        bucketRows.value = await db.value.getAll(BUCKETS_QUERY)
+        tableRows.value = await db.value.getAll(TABLES_QUERY)
+      }
+      else if (synced_at != null) {
         // Busy downloading, but have already synced once
-        bucketRows.value = await db.value.getAll(BUCKETS_QUERY_FAST);
+        bucketRows.value = await db.value.getAll(BUCKETS_QUERY_FAST)
         // Load tables if we haven't yet
         if (tableRows.value == null) {
-          tableRows.value = await db.value.getAll(TABLES_QUERY);
+          tableRows.value = await db.value.getAll(TABLES_QUERY)
         }
-      } else {
+      }
+      else {
         // Fast query to show progress during initial sync / while downloading bulk data
-        bucketRows.value = await db.value.getAll(BUCKETS_QUERY_FAST);
-        tableRows.value = null;
+        bucketRows.value = await db.value.getAll(BUCKETS_QUERY_FAST)
+        tableRows.value = null
       }
     }
   }
 
   // Register PowerSync status listener for proper sync monitoring
   onMounted(async () => {
-    if (!db.value) return;
+    console.log('onMounted')
+    if (!db.value) return
 
     // Register listener for PowerSync status changes
     const unregisterListener = db.value.registerListener({
       statusChanged: (newStatus) => {
+        console.log('statusChanged', newStatus)
         // Update reactive status
-        hasSynced.value = !!newStatus.hasSynced;
-        isConnected.value = !!newStatus.connected;
-        isDownloading.value = !!newStatus.dataFlowStatus.downloading;
-        isUploading.value = !!newStatus.dataFlowStatus.uploading;
-        lastSyncedAt.value = newStatus.lastSyncedAt || "";
-        uploadError.value = newStatus.dataFlowStatus.uploadError || null;
-        downloadError.value = newStatus.dataFlowStatus.downloadError || null;
-        downloadProgressDetails.value =
-          newStatus.dataFlowStatus.downloadProgress || null;
+        hasSynced.value = !!newStatus.hasSynced
+        isConnected.value = !!newStatus.connected
+        isDownloading.value = !!newStatus.dataFlowStatus.downloading
+        isUploading.value = !!newStatus.dataFlowStatus.uploading
+        lastSyncedAt.value = newStatus.lastSyncedAt || ''
+        uploadError.value = newStatus.dataFlowStatus.uploadError || null
+        downloadError.value = newStatus.dataFlowStatus.downloadError || null
+        downloadProgressDetails.value
+          = newStatus.dataFlowStatus.downloadProgress || null
 
         if (
-          newStatus?.hasSynced === undefined ||
-          (newStatus?.priorityStatusEntries?.length &&
-            newStatus.priorityStatusEntries.length > 0)
+          newStatus?.hasSynced === undefined
+          || (newStatus?.priorityStatusEntries?.length
+            && newStatus.priorityStatusEntries.length > 0)
         ) {
-          hasSynced.value =
-            newStatus?.priorityStatusEntries.every(
-              (entry) => entry.hasSynced
-            ) ?? false;
+          hasSynced.value
+            = newStatus?.priorityStatusEntries.every(
+              entry => entry.hasSynced,
+            ) ?? false
         }
 
         if (
-          newStatus?.dataFlowStatus.downloading ||
-          newStatus?.dataFlowStatus.uploading
+          newStatus?.dataFlowStatus.downloading
+          || newStatus?.dataFlowStatus.uploading
         ) {
-          isSyncing.value = true;
-        } else {
-          isSyncing.value = false;
+          isSyncing.value = true
+        }
+        else {
+          isSyncing.value = false
         }
       },
-    });
+    })
 
     db.value!.onChangeWithCallback(
       {
         async onChange(_event) {
-          await refreshState();
+          await refreshState()
         },
       },
       {
         rawTableNames: true,
         tables: [
-          "ps_oplog",
-          "ps_buckets",
-          "ps_data_local__local_bucket_data",
-          "ps_crud",
+          'ps_oplog',
+          'ps_buckets',
+          'ps_data_local__local_bucket_data',
+          'ps_crud',
         ],
         throttleMs: 500,
-      }
-    );
+      },
+    )
 
     try {
-      await refreshState();
-    } catch (error: any) {
-      if (error.message === "no such table: local_bucket_data") {
-        isDiagnosticSchemaSetup.value = false;
+      await refreshState()
+    }
+    catch (error: any) {
+      if (error.message === 'no such table: local_bucket_data') {
+        isDiagnosticSchemaSetup.value = false
       }
     }
 
     // Clean up listener on unmount
     onUnmounted(() => {
-      unregisterListener();
-    });
-  });
+      unregisterListener()
+    })
+  })
 
   // exposed state
   return {
@@ -337,5 +343,5 @@ export function usePowerSyncInspectorDiagnostics() {
     totals: readonly(totals),
     clearData,
     formatBytes,
-  };
+  }
 }

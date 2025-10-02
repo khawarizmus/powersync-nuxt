@@ -5,7 +5,26 @@ services:
     image: journeyapps/powersync-service:latest
     volumes:
       - ./powersync.yaml:/app/powersync.yaml
+      - ./sync-rules.yaml:/app/sync-rules.yaml
     env_file: ./.env
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://localhost:6060/probes/liveness').then(r => r.ok ? process.exit(0) : process.exit(1)).catch(() => process.exit(1))",
+        ]
+      interval: 5s
+      timeout: 1s
+      retries: 15
     ports:
       - 6060:6060
       - 9090:9090 # for telemetry
+
+networks:
+  default:
+    enable_ipv6: true
+    ipam:
+      config:
+        - subnet: fd00::/64
