@@ -3,6 +3,10 @@ const client = useSupabaseClient()
 const user = useSupabaseUser()
 const toast = useToast()
 
+const db = usePowerSync()
+
+console.log('PowerSync DB', db)
+
 const tasksFromServer = ref()
 const isModalOpen = ref(false)
 const loading = ref(false)
@@ -85,14 +89,13 @@ const links = ref([
     label: 'PowerSync Inspector',
     to: '/__powersync-inspector',
     icon: 'lucide:binoculars',
-    // icon: 'carbon:data-analytics',
-    color: 'neutral',
+    color: 'neutral' as const,
   },
   {
     label: 'PowerSync Documentation',
     to: 'https://docs.powersync.com/intro/powersync-overview',
-    color: 'neutral',
-    variant: 'subtle',
+    color: 'neutral' as const,
+    variant: 'subtle' as const,
     trailingIcon: 'i-lucide-arrow-right',
     target: '_blank',
   },

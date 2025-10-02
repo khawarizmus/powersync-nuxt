@@ -11,6 +11,7 @@ import {
 } from '@nuxt/kit'
 import { defu } from 'defu'
 import { setupDevToolsUI } from './devtools'
+import { addImportsFrom } from './runtime/utils/addImportsFrom'
 
 // function rPath(p: string) {
 //   return fileURLToPath(new URL(p, import.meta.url).toString());
@@ -52,7 +53,7 @@ export default defineNuxtModule<PowerSyncModuleOptions>({
     const resolver = createResolver(import.meta.url)
 
     nuxt.options.runtimeConfig.public.powerSyncModuleOptions = defu(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       nuxt.options.runtimeConfig.public.powerSyncModuleOptions as any,
       {
         defaultConnectionParams: options.defaultConnectionParams,
@@ -104,63 +105,79 @@ export default defineNuxtModule<PowerSyncModuleOptions>({
       })
     })
 
+    addImportsFrom([
+      'createPowerSyncPlugin',
+      'providePowerSync',
+      'usePowerSync',
+      'usePowerSyncQuery',
+      'usePowerSyncStatus',
+      'usePowerSyncWatchedQuery',
+      'useQuery',
+      'useStatus',
+      'useWatchedQuerySubscription',
+    ], '@powersync/vue')
+
+    // addImportsFrom([
+    //   'PowerSyncDatabase',
+    // ], '@powersync/web')
+
     // Add Reka UI auto-imports for your module components
-    addImports([
-      // Editable components
-      {
-        name: 'EditableRoot',
-        from: 'reka-ui',
-      },
-      {
-        name: 'EditableArea',
-        from: 'reka-ui',
-      },
-      {
-        name: 'EditableInput',
-        from: 'reka-ui',
-      },
-      {
-        name: 'EditablePreview',
-        from: 'reka-ui',
-      },
-      {
-        name: 'EditableEditTrigger',
-        from: 'reka-ui',
-      },
-      {
-        name: 'EditableSubmitTrigger',
-        from: 'reka-ui',
-      },
-      {
-        name: 'EditableCancelTrigger',
-        from: 'reka-ui',
-      },
-      // TanStack Table
-      {
-        name: 'useVueTable',
-        from: '@tanstack/vue-table',
-      },
-      {
-        name: 'FlexRender',
-        from: '@tanstack/vue-table',
-      },
-      {
-        name: 'getCoreRowModel',
-        from: '@tanstack/vue-table',
-      },
-      {
-        name: 'getSortedRowModel',
-        from: '@tanstack/vue-table',
-      },
-      {
-        name: 'getFilteredRowModel',
-        from: '@tanstack/vue-table',
-      },
-      {
-        name: 'getPaginationRowModel',
-        from: '@tanstack/vue-table',
-      },
-    ])
+    // addImports([
+    //   // Editable components
+    //   {
+    //     name: 'EditableRoot',
+    //     from: 'reka-ui',
+    //   },
+    //   {
+    //     name: 'EditableArea',
+    //     from: 'reka-ui',
+    //   },
+    //   {
+    //     name: 'EditableInput',
+    //     from: 'reka-ui',
+    //   },
+    //   {
+    //     name: 'EditablePreview',
+    //     from: 'reka-ui',
+    //   },
+    //   {
+    //     name: 'EditableEditTrigger',
+    //     from: 'reka-ui',
+    //   },
+    //   {
+    //     name: 'EditableSubmitTrigger',
+    //     from: 'reka-ui',
+    //   },
+    //   {
+    //     name: 'EditableCancelTrigger',
+    //     from: 'reka-ui',
+    //   },
+    //   // TanStack Table
+    //   {
+    //     name: 'useVueTable',
+    //     from: '@tanstack/vue-table',
+    //   },
+    //   {
+    //     name: 'FlexRender',
+    //     from: '@tanstack/vue-table',
+    //   },
+    //   {
+    //     name: 'getCoreRowModel',
+    //     from: '@tanstack/vue-table',
+    //   },
+    //   {
+    //     name: 'getSortedRowModel',
+    //     from: '@tanstack/vue-table',
+    //   },
+    //   {
+    //     name: 'getFilteredRowModel',
+    //     from: '@tanstack/vue-table',
+    //   },
+    //   {
+    //     name: 'getPaginationRowModel',
+    //     from: '@tanstack/vue-table',
+    //   },
+    // ])
 
     // Ensure the packages are transpiled
     nuxt.options.build.transpile = nuxt.options.build.transpile || []

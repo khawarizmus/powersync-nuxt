@@ -17,6 +17,12 @@ export default defineNuxtConfig({
 
   css: ['~/assets/css/main.css'],
 
+  runtimeConfig: {
+    public: {
+      powersyncUrl: process.env.NUXT_PUBLIC_POWERSYNC_URL,
+    },
+  },
+
   // enable hot reloading when we make changes to our module
   watch: ['../src/*', './**/*'],
 
@@ -61,6 +67,11 @@ export default defineNuxtConfig({
       callback: '/confirm',
       // include: ['/protected'],
       exclude: ['/unprotected', '/public/*'],
+    },
+    clientOptions: {
+      auth: {
+        persistSession: true,
+      },
     },
   },
 

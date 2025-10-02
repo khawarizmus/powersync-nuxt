@@ -1,7 +1,7 @@
-import { column, Schema, Table } from '@powersync/web';
+import { column, Schema, Table } from '@powersync/web'
 
-export const LISTS_TABLE = 'lists';
-export const TODOS_TABLE = 'todos';
+export const LISTS_TABLE = 'lists'
+export const TODOS_TABLE = 'todos'
 
 const todos = new Table(
   {
@@ -11,23 +11,23 @@ const todos = new Table(
     description: column.text,
     created_by: column.text,
     completed_by: column.text,
-    completed: column.integer
+    completed: column.integer,
   },
-  { indexes: { list: ['list_id'] } }
-);
+  { indexes: { list: ['list_id'] } },
+)
 
 const lists = new Table({
   created_at: column.text,
   name: column.text,
-  owner_id: column.text
-});
+  owner_id: column.text,
+})
 
 export const AppSchema = new Schema({
   todos,
-  lists
-});
+  lists,
+})
 
-export type Database = (typeof AppSchema)['types'];
-export type TodoRecord = Database['todos'];
+export type Database = (typeof AppSchema)['types']
+export type TodoRecord = Database['todos']
 
-export type ListRecord = Database['lists'];
+export type ListRecord = Database['lists']
