@@ -34,23 +34,25 @@ const powerSync = usePowerSync()
 const syncStatus = usePowerSyncStatus()
 
 const user = useSupabaseUser()
+const powerSyncLogger = useDiagnosticsLogger()
 
 watch(user, () => {
-  if (user.value) {
+  if (user) {
     if (syncStatus.value.hasSynced) {
+      powerSyncLogger.log('User is logged in and has synced...', { user: user, syncStatus: syncStatus.value })
       appIsReady.value = true
     }
     else {
+      powerSyncLogger.log('User is logged waiting for first sync...', { user: user, syncStatus: syncStatus.value })
       powerSync.value.waitForFirstSync().then(() => {
         appIsReady.value = true
       })
     }
   }
   else {
+    powerSyncLogger.log('User is not logged in disconnecting...', { user: user, syncStatus: syncStatus.value })
     powerSync.value.disconnect()
     appIsReady.value = true
   }
 }, { immediate: true })
-
-console.log('User', user.value)
 </script>

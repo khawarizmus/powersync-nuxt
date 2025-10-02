@@ -91,6 +91,11 @@ export default defineNuxtModule<PowerSyncModuleOptions>({
       from: resolver.resolve('./runtime/composables/usePowerSyncKysely'),
     })
 
+    addImports({
+      name: 'useDiagnosticsLogger',
+      from: resolver.resolve('./runtime/composables/useDiagnosticsLogger'),
+    })
+
     // From the runtime directory
     addComponentsDir({
       path: resolver.resolve('runtime/components'),
