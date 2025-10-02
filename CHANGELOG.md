@@ -1,6 +1,26 @@
 # Changelog
 
 
+## v1.4.0
+
+[compare changes](https://github.com/khawarizmus/powersync-nuxt/compare/v1.3.0...v1.4.0)
+
+### 🚀 Enhancements
+
+- Export @powersync/vue composables via the nuxt module ([4cb1e47](https://github.com/khawarizmus/powersync-nuxt/commit/4cb1e47))
+- Added kysely composable ([ebf24e1](https://github.com/khawarizmus/powersync-nuxt/commit/ebf24e1))
+- Added kysely composable ([afb6ccc](https://github.com/khawarizmus/powersync-nuxt/commit/afb6ccc))
+
+### 🏡 Chore
+
+- **release:** V1.3.0 ([bd75e3d](https://github.com/khawarizmus/powersync-nuxt/commit/bd75e3d))
+- Put togather a working demo to use the module on ([64c0038](https://github.com/khawarizmus/powersync-nuxt/commit/64c0038))
+
+### ❤️ Contributors
+
+- Amine <amine@powersync.com>
+- Khawarizmus
+
 ## v1.3.0
 
 [compare changes](https://github.com/khawarizmus/powersync-nuxt/compare/v1.2.12...v1.3.0)
