@@ -4,7 +4,6 @@ import type { Database, TaskRecord } from '~/powersync/AppSchema'
 const client = useSupabaseClient()
 const user = asyncComputed(async () => await client.auth.getUser().then(res => res.data.user))
 const toast = useToast()
-const powerSync = usePowerSync()
 
 const db = usePowerSyncKysely<Database>()
 
