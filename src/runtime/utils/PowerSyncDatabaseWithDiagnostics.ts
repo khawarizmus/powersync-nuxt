@@ -18,7 +18,7 @@ export class PowerSyncDatabaseWithDiagnostics extends PowerSyncDatabase {
   private schemaManager!: DynamicSchemaManager
 
   constructor(options: WebPowerSyncDatabaseOptions) {
-    const logger = useDiagnosticsLogger()
+    const { logger } = useDiagnosticsLogger()
     const { getCurrentSchemaManager } = usePowerSyncInspector()
     // Create schema manager before calling super
     const currentSchemaManager = getCurrentSchemaManager()

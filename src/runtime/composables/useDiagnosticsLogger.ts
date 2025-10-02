@@ -1,4 +1,28 @@
 import { createBaseLogger, LogLevel } from '@powersync/web'
+import { createConsola, type LogType } from 'consola'
+import { createStorage } from 'unstorage'
+import localStorageDriver from 'unstorage/drivers/session-storage'
+
+const logsStorage = createStorage({
+  driver: localStorageDriver({ base: 'powersync:' }),
+})
+
+const consola = createConsola({
+  level: 5, // trace
+  fancy: true,
+  formatOptions: {
+    columns: 80,
+    colors: true,
+    compact: false,
+    date: true,
+  },
+})
+
+consola.addReporter({
+  log: async (logObject) => {
+    await logsStorage.set(`log:${logObject.date.toISOString()}`, logObject)
+  },
+})
 
 export const useDiagnosticsLogger = (callback?: () => void | Promise<void>) => {
   const logger = createBaseLogger()
@@ -11,10 +35,10 @@ export const useDiagnosticsLogger = (callback?: () => void | Promise<void>) => {
     const mainMessage = String(messageArray[0] || 'Empty log message')
     const extraData = messageArray.slice(1).reduce((acc, curr) => ({ ...acc, ...curr }), {})
 
-    console.log(`[PowerSync] [${level}] ${context.name ? `[${context.name}]` : ''} ${mainMessage}`, extraData)
+    consola[level.toLowerCase() as LogType](`[PowerSync] ${context.name ? `[${context.name}]` : ''} ${mainMessage}`, extraData)
     // user defined callback
     await callback?.()
   })
 
-  return logger
+  return { logger, logsStorage }
 }

@@ -8,7 +8,11 @@
     h="screen"
     overflow="hidden"
   >
-    <SplitterGroup id="splitter-group-1" class="h-full" direction="horizontal">
+    <SplitterGroup
+      id="splitter-group-1"
+      class="h-full"
+      direction="horizontal"
+    >
       <SplitterPanel
         id="splitter-group-1-panel-1"
         :min-size="20"
@@ -32,13 +36,13 @@
           <div class="flex-1 overflow-y-auto">
             <TreeRoot
               v-if="filteredTreeData && filteredTreeData.length > 0"
+              v-slot="{ flattenItems }"
               v-model="selectedEntry"
+              v-model:expanded="expandedItems"
               :items="filteredTreeData"
               :get-key="(item) => item.name"
               :get-children="(item) => item.children || undefined"
               class="h-full"
-              v-slot="{ flattenItems }"
-              v-model:expanded="expandedItems"
             >
               <TreeItem
                 v-for="item in flattenItems"
@@ -110,17 +114,27 @@
         id="splitter-group-1-resize-handle-1"
         class="w-px bg-gray-200"
       />
-      <SplitterPanel id="splitter-group-1-panel-2" :min-size="20">
+      <SplitterPanel
+        id="splitter-group-1-panel-2"
+        :min-size="20"
+      >
         <div
           v-if="!selectedEntry"
           class="flex w-full h-full justify-center items-center align-middle"
         >
-          <div text="sm gray-500" flex="~ gap-2 items-center">
+          <div
+            text="sm gray-500"
+            flex="~ gap-2 items-center"
+          >
             <NIcon icon="carbon:document-blank" />
             <span>No Selection</span>
           </div>
         </div>
-        <SplitterGroup v-else id="splitter-group-2" direction="vertical">
+        <SplitterGroup
+          v-else
+          id="splitter-group-2"
+          direction="vertical"
+        >
           <SplitterPanel
             id="splitter-group-2-panel-1"
             :min-size="10"
@@ -135,7 +149,10 @@
                 class="absolute inset-0 pointer-events-none overflow-auto"
                 :style="{ scrollBehavior: 'auto' }"
               >
-                <div v-html="html" class="syntax-highlight-bg" />
+                <div
+                  class="syntax-highlight-bg"
+                  v-html="html"
+                />
               </div>
 
               <!-- Transparent Textarea Overlay -->
@@ -192,7 +209,11 @@
               <div
                 class="px-3 py-2 flex justify-between items-center bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex-shrink-0"
               >
-                <NButton n="xs" icon="carbon:play" @click="executeQuery">
+                <NButton
+                  n="xs"
+                  icon="carbon:play"
+                  @click="executeQuery"
+                >
                   Execute Query
                 </NButton>
               </div>
@@ -243,9 +264,7 @@
 
                   <!-- Page Jump Input -->
                   <div class="flex items-center gap-1">
-                    <span class="text-xs text-gray-600 dark:text-gray-400"
-                      >Page</span
-                    >
+                    <span class="text-xs text-gray-600 dark:text-gray-400">Page</span>
                     <NTextInput
                       v-model="currentPageInput"
                       n="xs"
@@ -256,9 +275,7 @@
                       @blur="jumpToPage"
                       @keydown.enter="jumpToPage"
                     />
-                    <span class="text-xs text-gray-600 dark:text-gray-400"
-                      >of {{ table.getPageCount() }}</span
-                    >
+                    <span class="text-xs text-gray-600 dark:text-gray-400">of {{ table.getPageCount() }}</span>
                   </div>
 
                   <NButton
@@ -271,9 +288,7 @@
 
                 <!-- Page Size Control -->
                 <div class="flex items-center gap-1">
-                  <span class="text-xs text-gray-600 dark:text-gray-400"
-                    >Show:</span
-                  >
+                  <span class="text-xs text-gray-600 dark:text-gray-400">Show:</span>
                   <NTextInput
                     v-model="pageSizeInput"
                     n="xs"
@@ -284,9 +299,7 @@
                     @blur="updatePageSize"
                     @keydown.enter="updatePageSize"
                   />
-                  <span class="text-xs text-gray-600 dark:text-gray-400"
-                    >per page</span
-                  >
+                  <span class="text-xs text-gray-600 dark:text-gray-400">per page</span>
                 </div>
               </div>
 
@@ -387,7 +400,11 @@
               <div
                 class="px-3 py-2 flex justify-between items-center bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex-shrink-0"
               >
-                <NButton n="xs" icon="carbon:play" @click="executeQuery">
+                <NButton
+                  n="xs"
+                  icon="carbon:play"
+                  @click="executeQuery"
+                >
                   Execute Query
                 </NButton>
               </div>
@@ -398,7 +415,10 @@
               </div>
             </div>
 
-            <div v-else class="text-center py-8">
+            <div
+              v-else
+              class="text-center py-8"
+            >
               <div class="text-gray-500 dark:text-gray-400">
                 Execute a query to see results
               </div>
@@ -411,14 +431,14 @@
 </template>
 
 <script setup lang="ts">
-import { usePowerSyncInspectorDiagnostics } from "#imports";
+import { usePowerSyncInspectorDiagnostics } from '#imports'
 import {
   SplitterGroup,
   SplitterPanel,
   SplitterResizeHandle,
   TreeItem,
   TreeRoot,
-} from "reka-ui";
+} from 'reka-ui'
 
 import {
   FlexRender,
@@ -426,209 +446,209 @@ import {
   useVueTable,
   getSortedRowModel,
   getPaginationRowModel,
-} from "@tanstack/vue-table";
+} from '@tanstack/vue-table'
 
-import { codeToHtml } from "shiki";
-import Fuse from "fuse.js";
+import { codeToHtml } from 'shiki'
+import Fuse from 'fuse.js'
 
 const ENTRIES_QUERY = `
 SELECT name, type 
 FROM sqlite_schema
 WHERE type IN ('table', 'view')
 ORDER BY type, name;
-`;
+`
 
-const { db } = usePowerSyncInspectorDiagnostics();
+const { db } = usePowerSyncInspectorDiagnostics()
 
-const entriesRows = ref<{ name: string; type: string }[] | null>(null);
-const expandedItems = ref<string[]>([]);
-const _tableInfo = ref<any | null>(null);
+const entriesRows = ref<{ name: string, type: string }[] | null>(null)
+const expandedItems = ref<string[]>([])
+const _tableInfo = ref<any | null>(null)
 
 // Create hierarchical tree structure
 const treeData = computed(() => {
-  if (!entriesRows.value) return [];
+  if (!entriesRows.value) return []
 
-  const tables = entriesRows.value.filter((entry) => entry.type === "table");
-  const views = entriesRows.value.filter((entry) => entry.type === "view");
+  const tables = entriesRows.value.filter(entry => entry.type === 'table')
+  const views = entriesRows.value.filter(entry => entry.type === 'view')
 
-  const treeItems = [];
+  const treeItems = []
 
   if (tables.length > 0) {
     treeItems.push({
-      name: "Tables",
-      type: "folder",
-      icon: "carbon:folder",
-      children: tables.map((table) => ({
+      name: 'Tables',
+      type: 'folder',
+      icon: 'carbon:folder',
+      children: tables.map(table => ({
         ...table,
-        icon: "carbon:data-base",
+        icon: 'carbon:data-base',
       })),
-    });
+    })
   }
 
   if (views.length > 0) {
     treeItems.push({
-      name: "Views",
-      type: "folder",
-      icon: "carbon:view",
-      children: views.map((view) => ({
+      name: 'Views',
+      type: 'folder',
+      icon: 'carbon:view',
+      children: views.map(view => ({
         ...view,
-        icon: "carbon:data-view",
+        icon: 'carbon:data-view',
       })),
-    });
+    })
   }
 
-  return treeItems;
-});
+  return treeItems
+})
 
 // Initialize Fuse.js for fuzzy search
 const initializeFuse = () => {
-  if (!entriesRows.value) return;
+  if (!entriesRows.value) return
 
   const fuseOptions = {
-    keys: ["name"],
+    keys: ['name'],
     threshold: 0.3, // Adjust fuzzy search sensitivity (0 = exact, 1 = very fuzzy)
     includeScore: true,
     includeMatches: true,
-  };
+  }
 
-  fuse.value = new Fuse(entriesRows.value, fuseOptions);
-};
+  fuse.value = new Fuse(entriesRows.value, fuseOptions)
+}
 
 // Filtered tree data based on search
 const filteredTreeData = computed(() => {
   if (!searchQuery.value || !fuse.value) {
-    return treeData.value;
+    return treeData.value
   }
 
   // Perform fuzzy search
-  const searchResults = fuse.value.search(searchQuery.value);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const filteredEntries = searchResults.map((result: any) => result.item);
+  const searchResults = fuse.value.search(searchQuery.value)
+
+  const filteredEntries = searchResults.map((result: any) => result.item)
 
   // Rebuild tree structure with filtered results
-  const tables = filteredEntries.filter((entry) => entry.type === "table");
-  const views = filteredEntries.filter((entry) => entry.type === "view");
+  const tables = filteredEntries.filter(entry => entry.type === 'table')
+  const views = filteredEntries.filter(entry => entry.type === 'view')
 
-  const filteredTreeItems = [];
+  const filteredTreeItems = []
 
   if (tables.length > 0) {
     filteredTreeItems.push({
-      name: "Tables",
-      type: "folder",
-      icon: "carbon:folder",
-      children: tables.map((table) => ({
+      name: 'Tables',
+      type: 'folder',
+      icon: 'carbon:folder',
+      children: tables.map(table => ({
         ...table,
-        icon: "carbon:data-base",
+        icon: 'carbon:data-base',
       })),
-    });
+    })
   }
 
   if (views.length > 0) {
     filteredTreeItems.push({
-      name: "Views",
-      type: "folder",
-      icon: "carbon:view",
-      children: views.map((view) => ({
+      name: 'Views',
+      type: 'folder',
+      icon: 'carbon:view',
+      children: views.map(view => ({
         ...view,
-        icon: "carbon:data-view",
+        icon: 'carbon:data-view',
       })),
-    });
+    })
   }
 
-  return filteredTreeItems;
-});
+  return filteredTreeItems
+})
 
 onMounted(async () => {
-  entriesRows.value = await db.value.getAll(ENTRIES_QUERY);
-  initializeFuse();
-});
+  entriesRows.value = await db.value.getAll(ENTRIES_QUERY)
+  initializeFuse()
+})
 
 // Re-initialize Fuse when entries change
 watch(entriesRows, () => {
-  initializeFuse();
-});
+  initializeFuse()
+})
 
 // Search input handler
 const onSearchInput = () => {
-  expandedItems.value = ["Tables", "Views"];
-};
+  expandedItems.value = ['Tables', 'Views']
+}
 
-const selectedEntry = ref<{ name: string; type: string } | undefined>(
-  undefined
-);
-const query = ref<string>("");
-const isLoading = ref(false);
-const queryError = ref<string | null>(null);
-const _hasLimitOrOffset = ref(false);
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const currentTableRows = ref<any[] | null>(null);
+const selectedEntry = ref<{ name: string, type: string } | undefined>(
+  undefined,
+)
+const query = ref<string>('')
+const isLoading = ref(false)
+const queryError = ref<string | null>(null)
+const _hasLimitOrOffset = ref(false)
+
+const currentTableRows = ref<any[] | null>(null)
 
 // Pagination controls
-const currentPageInput = ref<string>("1");
-const pageSizeInput = ref<string>("50");
+const currentPageInput = ref<string>('1')
+const pageSizeInput = ref<string>('50')
 
 // Search functionality
-const searchQuery = ref<string>("");
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const fuse = ref<Fuse<any>>();
+const searchQuery = ref<string>('')
+
+const fuse = ref<Fuse<any>>()
 
 // Editor refs for scroll synchronization
-const textareaRef = ref<HTMLTextAreaElement>();
-const highlightContainer = ref<HTMLDivElement>();
-const cursorOverlay = ref<HTMLDivElement>();
+const textareaRef = ref<HTMLTextAreaElement>()
+const highlightContainer = ref<HTMLDivElement>()
+const cursorOverlay = ref<HTMLDivElement>()
 
 // Create dynamic columns based on query results
 const columns = computed(() => {
-  if (!currentTableRows.value || currentTableRows.value.length === 0) return [];
+  if (!currentTableRows.value || currentTableRows.value.length === 0) return []
 
-  const firstRow = currentTableRows.value[0];
-  const dataColumns = Object.keys(firstRow);
+  const firstRow = currentTableRows.value[0]
+  const dataColumns = Object.keys(firstRow)
 
   // Create columns array with row number column first
   const columnsArray = [
     // Row number column (no header name)
     {
-      id: "rowNumber",
-      header: "",
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      id: 'rowNumber',
+      header: '',
+
       cell: ({ row }: any) => row.index + 1,
       size: 60,
       enableSorting: false,
       enableResizing: false,
     },
     // Data columns
-    ...dataColumns.map((key) => ({
+    ...dataColumns.map(key => ({
       accessorKey: key,
       header: key,
       size: 150,
       minSize: 20,
       maxSize: 800,
       enableResizing: true,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       cell: ({ getValue }: any) => {
-        const value = getValue();
-        if (value === null) return "NULL";
-        if (value === undefined) return "UNDEFINED";
-        return String(value);
+        const value = getValue()
+        if (value === null) return 'NULL'
+        if (value === undefined) return 'UNDEFINED'
+        return String(value)
       },
     })),
-  ];
+  ]
 
-  return columnsArray;
-});
+  return columnsArray
+})
 
 const table = useVueTable({
   get data() {
-    return currentTableRows.value || [];
+    return currentTableRows.value || []
   },
   get columns() {
-    return columns.value;
+    return columns.value
   },
   getCoreRowModel: getCoreRowModel(),
   getSortedRowModel: getSortedRowModel(),
   getPaginationRowModel: getPaginationRowModel(),
   enableColumnResizing: true,
-  columnResizeMode: "onChange",
+  columnResizeMode: 'onChange',
   defaultColumn: {
     size: 150,
     minSize: 20,
@@ -639,93 +659,97 @@ const table = useVueTable({
       pageSize: 50, // Show 50 rows per page
     },
   },
-});
+})
 
 const html = asyncComputed(
   async () =>
     await codeToHtml(query.value, {
-      lang: "sql",
+      lang: 'sql',
       themes: {
-        light: "catppuccin-latte",
-        dark: "catppuccin-frappe",
+        light: 'catppuccin-latte',
+        dark: 'catppuccin-frappe',
       },
-    })
-);
+    }),
+)
 
 // Scroll synchronization between textarea and highlight background
 const syncScroll = () => {
   if (textareaRef.value && highlightContainer.value) {
-    highlightContainer.value.scrollTop = textareaRef.value.scrollTop;
-    highlightContainer.value.scrollLeft = textareaRef.value.scrollLeft;
+    highlightContainer.value.scrollTop = textareaRef.value.scrollTop
+    highlightContainer.value.scrollLeft = textareaRef.value.scrollLeft
   }
-};
+}
 
 // Pagination control functions
 const jumpToPage = () => {
-  const pageNumber = Number.parseInt(currentPageInput.value, 10);
+  const pageNumber = Number.parseInt(currentPageInput.value, 10)
   if (pageNumber >= 1 && pageNumber <= table.getPageCount()) {
-    table.setPageIndex(pageNumber - 1); // TanStack uses 0-based indexing
-  } else {
-    // Reset to current page if invalid
-    currentPageInput.value = String(table.getState().pagination.pageIndex + 1);
+    table.setPageIndex(pageNumber - 1) // TanStack uses 0-based indexing
   }
-};
+  else {
+    // Reset to current page if invalid
+    currentPageInput.value = String(table.getState().pagination.pageIndex + 1)
+  }
+}
 
 const updatePageSize = () => {
-  const pageSize = Number.parseInt(pageSizeInput.value, 10);
+  const pageSize = Number.parseInt(pageSizeInput.value, 10)
   if (pageSize >= 1 && pageSize <= 1000) {
-    table.setPageSize(pageSize);
-  } else {
-    // Reset to current page size if invalid
-    pageSizeInput.value = String(table.getState().pagination.pageSize);
+    table.setPageSize(pageSize)
   }
-};
+  else {
+    // Reset to current page size if invalid
+    pageSizeInput.value = String(table.getState().pagination.pageSize)
+  }
+}
 
 // Watch table state to sync inputs
 watch(
   () => table.getState().pagination.pageIndex,
   (newPageIndex) => {
-    currentPageInput.value = String(newPageIndex + 1);
-  }
-);
+    currentPageInput.value = String(newPageIndex + 1)
+  },
+)
 
 watch(
   () => table.getState().pagination.pageSize,
   (newPageSize) => {
-    pageSizeInput.value = String(newPageSize);
-  }
-);
+    pageSizeInput.value = String(newPageSize)
+  },
+)
 
-const selectEntry = (entry: { name: string; type: string }) => {
-  selectedEntry.value = entry;
-  query.value = `SELECT * FROM ${selectedEntry.value.name};`;
-  executeQuery();
-};
+const selectEntry = (entry: { name: string, type: string }) => {
+  selectedEntry.value = entry
+  query.value = `SELECT * FROM ${selectedEntry.value.name};`
+  executeQuery()
+}
 
 const executeQuery = async () => {
-  if (!query.value.trim() || !db.value) return;
+  if (!query.value.trim() || !db.value) return
 
-  isLoading.value = true;
-  queryError.value = null;
+  isLoading.value = true
+  queryError.value = null
 
   try {
-    const result = await db.value.getAll(query.value);
-    currentTableRows.value = result;
-  } catch (error) {
-    queryError.value =
-      error instanceof Error ? error.message : "Unknown error occurred";
-    currentTableRows.value = null;
-  } finally {
-    isLoading.value = false;
+    const result = await db.value.getAll(query.value)
+    currentTableRows.value = result
   }
-};
+  catch (error) {
+    queryError.value
+      = error instanceof Error ? error.message : 'Unknown error occurred'
+    currentTableRows.value = null
+  }
+  finally {
+    isLoading.value = false
+  }
+}
 
 // Auto-execute when selected table changes
 watch(selectedEntry, () => {
   if (selectedEntry.value) {
-    executeQuery();
+    executeQuery()
   }
-});
+})
 </script>
 
 <style>

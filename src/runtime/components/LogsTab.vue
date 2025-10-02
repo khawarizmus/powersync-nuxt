@@ -1,3 +1,316 @@
 <template>
-  <div>Logs Tab</div>
+  <div
+    border="t"
+    border-color="gray-100"
+    relative
+    n-bg="base"
+    flex="~ col"
+    h="screen"
+    overflow="hidden"
+  >
+    <!-- Toolbar -->
+    <div
+      class="flex items-center justify-between gap-3 px-3 py-2 border-b border-gray-200 dark:border-gray-700"
+    >
+      <div class="flex items-center gap-2 flex-1">
+        <NTextInput
+          v-model="searchQuery"
+          n="xs"
+          class="flex-1 max-w-md"
+          placeholder="Search logs..."
+          icon="carbon:search"
+        />
+
+        <select
+          v-model="selectedLevel"
+          class="px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800"
+        >
+          <option value="all">
+            All Levels
+          </option>
+          <option value="error">
+            Error
+          </option>
+          <option value="warn">
+            Warning
+          </option>
+          <option value="info">
+            Info
+          </option>
+          <option value="debug">
+            Debug
+          </option>
+        </select>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <NBadge n="slate xs">
+          {{ filteredLogs.length }}
+        </NBadge>
+        <NButton
+          n="xs red"
+          icon="carbon:trash-can"
+          @click="clearLogs"
+        >
+          Clear
+        </NButton>
+      </div>
+    </div>
+
+    <!-- Logs Table -->
+    <div class="flex-1 overflow-auto">
+      <div
+        v-if="filteredLogs.length === 0"
+        class="text-center py-12"
+      >
+        <div class="text-gray-500 dark:text-gray-400 text-sm">
+          No logs found
+        </div>
+      </div>
+
+      <table
+        v-else
+        class="w-full"
+      >
+        <thead class="sticky top-0 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 z-10">
+          <tr>
+            <th class="px-2 py-1.5 text-left text-xs font-medium text-gray-500 dark:text-gray-400 w-8" />
+            <th class="px-2 py-1.5 text-left text-xs font-medium text-gray-500 dark:text-gray-400 w-32">
+              Time
+            </th>
+            <th class="px-2 py-1.5 text-left text-xs font-medium text-gray-500 dark:text-gray-400 w-20">
+              Level
+            </th>
+            <th class="px-2 py-1.5 text-left text-xs font-medium text-gray-500 dark:text-gray-400">
+              Message
+            </th>
+            <th class="px-2 py-1.5 text-left text-xs font-medium text-gray-500 dark:text-gray-400 w-16" />
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+          <template
+            v-for="log in filteredLogs"
+            :key="log.key"
+          >
+            <tr
+              class="log-entry hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
+              @click="toggleExpand(log.key)"
+            >
+              <td class="px-2 py-1.5">
+                <div
+                  class="w-1.5 h-1.5 rounded-full"
+                  :class="getLogDotClass(log)"
+                />
+              </td>
+              <td class="px-2 py-1.5">
+                <span class="text-xs font-mono text-gray-600 dark:text-gray-400">
+                  {{ log.value ? formatTime(log.value.date) : '' }}
+                </span>
+              </td>
+              <td class="px-2 py-1.5">
+                <NBadge
+                  :n="`${getLogBadgeColor(log)} xs`"
+                >
+                  {{ getLogType(log) }}
+                </NBadge>
+              </td>
+              <td class="px-2 py-1.5">
+                <div class="text-xs text-gray-700 dark:text-gray-300 truncate max-w-3xl">
+                  {{ getLogMessage(log) }}
+                </div>
+              </td>
+              <td class="px-2 py-1.5 text-center">
+                <NIcon
+                  v-if="hasExtraData(log)"
+                  :icon="expandedLogs.has(log.key) ? 'carbon:chevron-up' : 'carbon:chevron-down'"
+                  class="text-gray-400 text-xs"
+                />
+              </td>
+            </tr>
+            <tr
+              v-if="expandedLogs.has(log.key) && hasExtraData(log)"
+              class="bg-gray-50 dark:bg-gray-900/50"
+            >
+              <td colspan="5">
+                <div class="px-10 py-2">
+                  <div class="text-xs font-mono bg-white dark:bg-gray-800 p-3 rounded border border-gray-200 dark:border-gray-700 overflow-x-auto">
+                    <pre class="text-gray-600 dark:text-gray-400">{{ formatExtraData(log) }}</pre>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </template>
+
+<script setup lang="ts">
+import { useDiagnosticsLogger } from '#imports'
+import { ref, computed } from 'vue'
+import { asyncComputed } from '@vueuse/core'
+import Fuse from 'fuse.js'
+
+interface LogValue {
+  date: string
+  args: any[]
+  type: string
+  level: number
+  tag: string
+}
+
+interface LogItem {
+  key: string
+  value: LogValue | null
+}
+
+const { logsStorage } = useDiagnosticsLogger()
+
+const searchQuery = ref('')
+const selectedLevel = ref('all')
+const expandedLogs = ref<Set<string>>(new Set())
+
+// Load all logs with computed
+const logs = asyncComputed<LogItem[]>(async () => {
+  const keys = await logsStorage.getKeys('log:')
+  const items = await logsStorage.getItems(
+    keys.map(key => ({ key })),
+  ) as LogItem[]
+
+  // Sort by date (newest first)
+  return items.sort((a, b) => {
+    const dateA = a.value ? new Date(a.value.date).getTime() : 0
+    const dateB = b.value ? new Date(b.value.date).getTime() : 0
+    return dateB - dateA
+  })
+}, [])
+
+// Initialize Fuse.js for fuzzy search
+const fuse = computed(() => {
+  if (!logs.value || logs.value.length === 0) return null
+
+  return new Fuse(logs.value, {
+    keys: [
+      { name: 'message', getFn: log => getLogMessage(log as LogItem) },
+      { name: 'type', getFn: log => (log as LogItem).value?.type || '' },
+    ],
+    threshold: 0.3,
+    includeScore: true,
+  })
+})
+
+// Filtered logs based on search and level
+const filteredLogs = computed(() => {
+  let filtered = logs.value || []
+
+  // Filter by level
+  if (selectedLevel.value !== 'all') {
+    filtered = filtered.filter((log: LogItem) =>
+      log.value?.type === selectedLevel.value,
+    )
+  }
+
+  // Fuzzy search
+  if (searchQuery.value && fuse.value) {
+    const searchResults = fuse.value.search(searchQuery.value)
+    const searchedItems = searchResults.map(result => result.item as LogItem)
+
+    // Filter the already level-filtered results
+    if (selectedLevel.value !== 'all') {
+      filtered = filtered.filter((log: LogItem) =>
+        searchedItems.some(item => item.key === log.key),
+      )
+    }
+    else {
+      filtered = searchedItems
+    }
+  }
+
+  return filtered
+})
+
+// Toggle expanded state
+function toggleExpand(key: string) {
+  if (expandedLogs.value.has(key)) {
+    expandedLogs.value.delete(key)
+  }
+  else {
+    expandedLogs.value.add(key)
+  }
+}
+
+// Helper functions
+function getLogMessage(log: LogItem): string {
+  if (!log.value?.args || log.value.args.length === 0) return 'Empty log message'
+  return String(log.value.args[0] || 'Empty log message')
+}
+
+function hasExtraData(log: LogItem): boolean {
+  return !!(log.value?.args && log.value.args.length > 1)
+}
+
+function formatExtraData(log: LogItem): string {
+  if (!log.value?.args || log.value.args.length <= 1) return ''
+  return JSON.stringify(log.value.args.slice(1), null, 2)
+}
+
+function formatTime(date: string): string {
+  return new Date(date).toLocaleTimeString('en-US', {
+    hour12: false,
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    fractionalSecondDigits: 3,
+  })
+}
+
+function getLogType(log: LogItem): string {
+  return (log.value?.type || 'info').toUpperCase()
+}
+
+function getLogDotClass(log: LogItem): string {
+  const type = log.value?.type || 'info'
+  const classes = {
+    error: 'bg-red-500',
+    warn: 'bg-yellow-500',
+    info: 'bg-blue-500',
+    debug: 'bg-gray-400',
+  }
+  return classes[type as keyof typeof classes] || classes.info
+}
+
+function getLogBadgeColor(log: LogItem): string {
+  const type = log.value?.type || 'info'
+  const colors = {
+    error: 'red',
+    warn: 'yellow',
+    info: 'blue',
+    debug: 'gray',
+  }
+  return colors[type as keyof typeof colors] || colors.info
+}
+
+async function clearLogs() {
+  const keys = await logsStorage.getKeys('log:')
+  await Promise.all(keys.map(key => logsStorage.removeItem(key)))
+  expandedLogs.value.clear()
+}
+</script>
+
+<style scoped>
+.log-entry {
+  animation: slideIn 0.2s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+</style>

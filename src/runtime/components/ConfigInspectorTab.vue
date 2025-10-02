@@ -1,13 +1,28 @@
 <template>
-  <div border="t" border-color="gray-100" relative n-bg="base" flex="~ col">
-    <div flex="~ col gap-2" class="h-full">
-      <NSectionBlock icon="carbon:parameter" text="Query Parameters">
+  <div
+    border="t"
+    border-color="gray-100"
+    relative
+    n-bg="base"
+    flex="~ col"
+  >
+    <div
+      flex="~ col gap-2"
+      class="h-full"
+    >
+      <NSectionBlock
+        icon="carbon:parameter"
+        text="Query Parameters"
+      >
         <div>
           <pre>{{ connectionOptions }}</pre>
         </div>
       </NSectionBlock>
 
-      <span border="b" border-color="gray-100"></span>
+      <span
+        border="b"
+        border-color="gray-100"
+      />
 
       <NSectionBlock
         icon="carbon:prompt-template"
@@ -17,7 +32,7 @@
         <div
           class="text-sm schema-code-block h-full overflow-auto"
           v-html="html"
-        ></div>
+        />
       </NSectionBlock>
     </div>
   </div>
@@ -27,15 +42,15 @@
 import {
   usePowerSyncInspectorDiagnostics,
   usePowerSyncInspector,
-} from "#imports";
-import { computed } from "vue";
-import { codeToHtml } from "shiki";
+} from '#imports'
+import { computed, onMounted } from 'vue'
+import { codeToHtml } from 'shiki'
 
-const { db } = usePowerSyncInspectorDiagnostics();
-const { getCurrentSchemaManager } = usePowerSyncInspector();
-const schemaManager = getCurrentSchemaManager();
+const { db } = usePowerSyncInspectorDiagnostics()
+const { getCurrentSchemaManager } = usePowerSyncInspector()
+const schemaManager = getCurrentSchemaManager()
 
-const connectionOptions = computed(() => db.value?.co);
+const connectionOptions = computed(() => db.value?.co)
 
 const schema = computed(() => {
   return `/**
@@ -46,23 +61,23 @@ const schema = computed(() => {
  * If a column contains only NULL values, the column will not be shown here.
  * Tables and columns are only added here. Nothing is removed until the database is cleared.
  */
-${schemaManager.schemaToString()}`;
-});
+${schemaManager.schemaToString()}`
+})
 
 const html = asyncComputed(
   async () =>
     await codeToHtml(schema.value, {
-      lang: "typescript",
+      lang: 'typescript',
       themes: {
-        light: "one-light",
-        dark: "min-dark",
+        light: 'one-light',
+        dark: 'min-dark',
       },
-    })
-);
+    }),
+)
 
 onMounted(async () => {
-  await db.value?.waitForFirstSync();
-});
+  await db.value?.waitForFirstSync()
+})
 </script>
 
 <style>

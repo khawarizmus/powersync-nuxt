@@ -45,19 +45,21 @@
     "@powersync/vue": "^0.4.0",
     "@powersync/web": "^1.25.1",
     "@tanstack/vue-table": "^8.21.3",
+    "consola": "^3.4.2",
     "defu": "^6.1.4",
     "destr": "^2.0.5",
     "fuse.js": "^7.1.0",
     "powersync-nuxt": "link:",
     "reka-ui": "^2.5.0",
     "shiki": "^3.13.0",
-    "sirv": "^3.0.1"
+    "sirv": "^3.0.1",
+    "unstorage": "^1.17.1"
   },
   "peerDependencies": {
     "@journeyapps/wa-sqlite": "^1.2.6",
+    "@powersync/kysely-driver": "^1.3.0",
     "@powersync/vue": "^0.4.0",
-    "@powersync/web": "^1.25.1",
-    "@powersync/kysely-driver": "^1.3.0"
+    "@powersync/web": "^1.25.1"
   },
   "devDependencies": {
     "@nuxt/devtools": "^2.6.2",

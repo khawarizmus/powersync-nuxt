@@ -244,13 +244,11 @@ export function usePowerSyncInspectorDiagnostics() {
 
   // Register PowerSync status listener for proper sync monitoring
   onMounted(async () => {
-    console.log('onMounted')
     if (!db.value) return
 
     // Register listener for PowerSync status changes
     const unregisterListener = db.value.registerListener({
       statusChanged: (newStatus) => {
-        console.log('statusChanged', newStatus)
         // Update reactive status
         hasSynced.value = !!newStatus.hasSynced
         isConnected.value = !!newStatus.connected

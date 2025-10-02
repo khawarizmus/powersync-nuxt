@@ -34,7 +34,7 @@ const powerSync = usePowerSync()
 const syncStatus = usePowerSyncStatus()
 
 const user = useSupabaseUser()
-const powerSyncLogger = useDiagnosticsLogger()
+const { logger: powerSyncLogger } = useDiagnosticsLogger()
 
 watch(user, () => {
   if (user) {
