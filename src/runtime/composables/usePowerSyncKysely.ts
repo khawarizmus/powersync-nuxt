@@ -6,5 +6,5 @@ export const usePowerSyncKysely = <T>() => {
 
   const db = wrapPowerSyncWithKysely<T>(powerSync.value)
 
-  return { db }
+  return db
 }

@@ -1,88 +1,81 @@
 <script setup lang="ts">
+import type { Database, TaskRecord } from '~/powersync/AppSchema'
+
 const client = useSupabaseClient()
-const user = useSupabaseUser()
+const user = asyncComputed(async () => await client.auth.getUser().then(res => res.data.user))
 const toast = useToast()
 
-const db = usePowerSync()
+const db = usePowerSyncKysely<Database>()
 
 console.log('PowerSync DB', db)
+
+const taskQuery = db.selectFrom('tasks').selectAll().where('user_id', '=', user.value?.id ?? '').orderBy('created_at')
+
+const { data: tasks, isLoading } = await useQuery(taskQuery)
 
 const tasksFromServer = ref()
 const isModalOpen = ref(false)
 const loading = ref(false)
 const newTask = ref('')
 
-const { data: tasks } = await useAsyncData(
-  'tasks',
-  async () => {
-    const { data } = await client
-      .from('tasks')
-      .select('*')
-      .eq('user', user.value!.id)
-      .order('created_at')
+// const { data: tasks } = await useAsyncData(
+//   'tasks',
+//   async () => {
+//     const { data } = await client
+//       .from('tasks')
+//       .select('*')
+//       .eq('user', user.value!.id)
+//       .order('created_at')
 
-    return data ?? []
-  },
-  { default: () => [] },
-)
+//     return data ?? []
+//   },
+//   { default: () => [] },
+// )
 
 async function addTask() {
   if (newTask.value.trim().length === 0) return
 
   loading.value = true
-
-  const { data, error } = await client
-    .from('tasks')
-    .upsert({
-      user: user.value!.id,
-      title: newTask.value,
-      completed: false,
-    })
-    .select('*')
-    .single()
-
-  if (error) {
+  try {
+    await db.insertInto('tasks').values({
+      user_id: user.value!.id,
+      description: newTask.value,
+      completed: 0,
+      id: crypto.randomUUID(),
+    }).execute()
+  }
+  catch (error: any) {
     toast.add({
       title: 'Error',
       description: error.message,
       color: 'error',
     })
   }
-
-  if (data) {
-    tasks.value = [...tasks.value, data]
-  }
-
   newTask.value = ''
   loading.value = false
 }
 
 const completeTask = async (
-  task: Database['public']['Tables']['tasks']['Row'],
+  task: TaskRecord,
 ) => {
-  await client
-    .from('tasks')
-    .update({ completed: task.completed })
-    .match({ id: task.id })
-  tasks.value = tasks.value.map(t => (t.id === task.id ? task : t))
+  await db.updateTable('tasks').set({ completed: task.completed }).where('id', '=', task.id).execute()
 }
 
 const removeTask = async (
-  task: Database['public']['Tables']['tasks']['Row'],
+  task: TaskRecord,
 ) => {
-  tasks.value = tasks.value.filter(t => t.id !== task.id)
-  await client.from('tasks').delete().match({ id: task.id })
+  await db.deleteFrom('tasks').where('id', '=', task.id).execute()
 }
 
-const fetchTasksFromServerRoute = async () => {
-  const { data } = await useFetch('/api/tasks', {
-    headers: useRequestHeaders(['cookie']),
-    key: 'tasks-from-server',
-  })
+// const fetchTasksFromServerRoute = async () => {
+//   const { data } = await useFetch('/api/tasks', {
+//     headers: useRequestHeaders(['cookie']),
+//     key: 'tasks-from-server',
+//   })
 
-  tasksFromServer.value = data
-  isModalOpen.value = true
-}
+//   tasksFromServer.value = data
+//   isModalOpen.value = true
+// }
 
 const links = ref([
   {
@@ -100,6 +93,10 @@ const links = ref([
     target: '_blank',
   },
 ])
+
+const refreshTasks = async () => {
+  //
+}
 </script>
 
 <template>
@@ -145,7 +142,7 @@ const links = ref([
                       class="truncate"
                       :class="task.completed ? 'line-through text-muted' : ''"
                     >
-                      {{ task.title }}
+                      {{ task.description }}
                     </span>
 
                     <div class="flex items-center gap-2">
@@ -172,7 +169,7 @@ const links = ref([
                 label="Fetch tasks from server route"
                 color="neutral"
                 variant="link"
-                @click="fetchTasksFromServerRoute"
+                @click="refreshTasks()"
               />
             </div>
           </div>

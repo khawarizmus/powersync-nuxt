@@ -29,18 +29,12 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-07-05',
 
   vite: {
-    server: {
-      hmr: {
-        // Instead of go through proxy, we directly connect real port of the client app
-        clientPort: +(process.env.PORT || 3300),
-      },
-    },
-
     plugins: [topLevelAwait()],
     optimizeDeps: {
       exclude: ['@journeyapps/wa-sqlite', '@powersync/web'],
       include: ['@powersync/web > js-logger'], // <-- Include `js-logger` when it isn't installed and imported.
     },
+
     worker: {
       format: 'es',
       plugins: () => [wasm(), topLevelAwait()],
