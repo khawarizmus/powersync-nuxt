@@ -1,7 +1,7 @@
 <template>
   <div
     border="t"
-    border-color="gray-100"
+    border-color="gray-200"
     relative
     n-bg="base"
     flex="~ col"
@@ -17,7 +17,7 @@
         id="splitter-group-1-panel-1"
         :min-size="20"
         :default-size="20"
-        class="border flex flex-col overflow-hidden"
+        class="border-x border-b border-gray-200 flex flex-col overflow-hidden"
       >
         <div class="flex-1 flex flex-col overflow-hidden">
           <!-- Search Bar -->
@@ -112,11 +112,12 @@
       </SplitterPanel>
       <SplitterResizeHandle
         id="splitter-group-1-resize-handle-1"
-        class="w-px bg-gray-200"
+        class="w-[2px] bg-gray-200 hover:bg-indigo-300 dark:hover:bg-indigo-700"
       />
       <SplitterPanel
         id="splitter-group-1-panel-2"
         :min-size="20"
+        class="border-b border-x border-gray-200"
       >
         <div
           v-if="!selectedEntry"
@@ -139,7 +140,6 @@
             id="splitter-group-2-panel-1"
             :min-size="10"
             :default-size="10"
-            class="border"
           >
             <!-- Custom Code Editor with Syntax Highlighting -->
             <div class="relative h-full w-full">
@@ -187,12 +187,12 @@
           </SplitterPanel>
           <SplitterResizeHandle
             id="splitter-group-2-resize-handle-1"
-            class="h-px bg-gray-200"
+            class="h-[2px] bg-gray-200 hover:bg-indigo-300 dark:hover:bg-indigo-700"
           />
           <SplitterPanel
             id="splitter-group-2-panel-2"
             :min-size="40"
-            class="border flex flex-col"
+            class="border-t-2 border-gray-200 flex flex-col"
           >
             <!-- Query Results Table -->
             <div
@@ -360,12 +360,12 @@
                     </tr>
                   </thead>
                   <tbody
-                    class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700 border-b border-gray-200 dark:border-gray-700"
+                    class="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700"
                   >
                     <tr
                       v-for="row in table.getRowModel().rows"
                       :key="row.id"
-                      class="hover:bg-gray-50 dark:hover:bg-gray-800"
+                      class="hover:bg-gray-50 dark:hover:bg-gray-800 border-b border-gray-200 dark:border-gray-700"
                     >
                       <td
                         v-for="cell in row.getVisibleCells()"
