@@ -141,16 +141,18 @@
             >
               <td colspan="12">
                 <div class="px-10 py-2">
-                  <div class="inline-flex items-center gap-2">
+                  <div class="inline-flex items-center gap-2 mb-2">
                     <NIcon
                       n="sm"
                       icon="carbon:object"
                     />
-
-                    JSON
+                    <span class="text-xs text-gray-600 dark:text-gray-400">JSON</span>
                   </div>
-                  <div class="text-xs font-mono bg-white dark:bg-gray-800 p-3 rounded border border-gray-200 dark:border-gray-700 overflow-x-auto">
-                    <pre class="text-gray-600 dark:text-gray-400">{{ formatExtraData(log) }}</pre>
+                  <div class="bg-white dark:bg-gray-800 p-3 rounded border border-gray-200 dark:border-gray-700 overflow-x-auto">
+                    <div
+                      class="json-code-block text-xs"
+                      v-html="highlightedJson.get(log.key)"
+                    />
                   </div>
                 </div>
               </td>
@@ -167,6 +169,7 @@ import { useDiagnosticsLogger } from '#imports'
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import Fuse from 'fuse.js'
 import type { LogObject } from 'consola'
+import { codeToHtml } from 'shiki'
 
 interface LogItem {
   key: string
@@ -179,6 +182,7 @@ const searchQuery = ref('')
 const selectedLevel = ref('all')
 const expandedLogs = ref<Set<string>>(new Set())
 const logs = ref<LogItem[]>([])
+const highlightedJson = ref<Map<string, string>>(new Map())
 
 // Load initial logs
 async function loadInitialLogs() {
@@ -250,12 +254,27 @@ const filteredLogs = computed(() => {
 })
 
 // Toggle expanded state
-function toggleExpand(key: string) {
+async function toggleExpand(key: string) {
   if (expandedLogs.value.has(key)) {
     expandedLogs.value.delete(key)
   }
   else {
     expandedLogs.value.add(key)
+    // Generate highlighted JSON if not already cached
+    if (!highlightedJson.value.has(key)) {
+      const log = logs.value.find(l => l.key === key)
+      if (log) {
+        const jsonStr = formatExtraData(log)
+        const html = await codeToHtml(jsonStr, {
+          lang: 'json',
+          themes: {
+            light: 'catppuccin-latte',
+            dark: 'catppuccin-frappe',
+          },
+        })
+        highlightedJson.value.set(key, html)
+      }
+    }
   }
 }
 
@@ -324,6 +343,7 @@ async function clearLogs() {
   await Promise.all(keys.map(key => logsStorage.removeItem(key)))
   logs.value = []
   expandedLogs.value.clear()
+  highlightedJson.value.clear()
 }
 </script>
 
@@ -341,5 +361,45 @@ async function clearLogs() {
     opacity: 1;
     transform: translateY(0);
   }
+}
+</style>
+
+<style>
+/* JSON code block styling with line numbers */
+.json-code-block {
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.json-code-block pre {
+  margin: 0;
+  padding: 0;
+  background: transparent !important;
+  overflow: visible;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.json-code-block code {
+  counter-reset: step;
+  counter-increment: step 0;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  display: block;
+  padding: 0;
+  margin: 0;
+}
+
+.json-code-block code .line::before {
+  content: counter(step);
+  counter-increment: step;
+  width: 1rem;
+  margin-right: 1.5rem;
+  display: inline-block;
+  text-align: right;
+  color: rgba(115, 138, 148, 0.4);
 }
 </style>
