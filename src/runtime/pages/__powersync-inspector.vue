@@ -99,11 +99,12 @@
       n="amber6 dark:amber5"
       cursor="pointer"
       :options="tabs"
+      @update:model-value="handleTabChange"
     />
   </div>
 
   <!-- switching tabs -->
-  <SyncStatusTab v-if="selectedTab === 'health'" />
+  <SyncStatusTab v-if="selectedTab === 'sync-status'" />
   <DataInspectorTab v-if="selectedTab === 'data'" />
   <ConfigInspectorTab v-if="selectedTab === 'config'" />
   <LogsTab v-if="selectedTab === 'logs'" />
@@ -112,7 +113,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useTimeAgo } from '@vueuse/core'
-import { definePageMeta, usePowerSyncInspectorDiagnostics } from '#imports'
+import { definePageMeta, usePowerSyncInspectorDiagnostics, useRoute, useRouter } from '#imports'
 import SyncStatusTab from '../components/SyncStatusTab.vue'
 import DataInspectorTab from '../components/DataInspectorTab.vue'
 import ConfigInspectorTab from '../components/ConfigInspectorTab.vue'
@@ -140,9 +141,16 @@ onMounted(async () => {
   await db.value?.waitForFirstSync()
 })
 
-const selectedTab = ref('health')
+const route = useRoute()
+const router = useRouter()
+const selectedTab = ref(route.query.tab as string || 'sync-status')
+
+const handleTabChange = (tab: string) => {
+  router.push({ query: { tab } })
+}
+
 const tabs = [
-  { label: 'Sync Status', value: 'health' },
+  { label: 'Sync Status', value: 'sync-status' },
   { label: 'Data Inspector', value: 'data' },
   { label: 'Config Inspector', value: 'config' },
   { label: 'Logs', value: 'logs' },
