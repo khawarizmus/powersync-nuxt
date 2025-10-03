@@ -45,12 +45,13 @@ import {
 } from '#imports'
 import { computed, onMounted } from 'vue'
 import { codeToHtml } from 'shiki'
+import { asyncComputed } from '@vueuse/core'
 
 const { db } = usePowerSyncInspectorDiagnostics()
 const { getCurrentSchemaManager } = usePowerSyncInspector()
 const schemaManager = getCurrentSchemaManager()
 
-const connectionOptions = computed(() => db.value?.co)
+// const connectionOptions = computed(() => db.value?.co)
 
 const schema = computed(() => {
   return `/**
@@ -118,5 +119,9 @@ onMounted(async () => {
   display: inline-block;
   text-align: right;
   color: rgba(115, 138, 148, 0.4);
+}
+
+.dark .schema-code-block code .line::before {
+  color: hsl(0, 2%, 51%);
 }
 </style>

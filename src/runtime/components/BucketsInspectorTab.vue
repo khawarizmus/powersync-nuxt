@@ -22,7 +22,7 @@
       >
         <div class="flex-1 flex flex-col overflow-hidden">
           <!-- Header -->
-          <div class="p-3 border-b border-gray-200 dark:border-gray-700">
+          <div class="p-3 border-b border-gray-200 dark:border-neutral-700">
             <div class="flex items-center justify-between mb-2">
               <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
                 Buckets
@@ -72,9 +72,9 @@
               <div
                 v-for="bucket in filteredBuckets"
                 :key="bucket.name"
-                class="bucket-item p-3 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer transition-all hover:bg-gray-50 dark:hover:bg-gray-800"
+                class="bucket-item p-3 rounded-lg border border-gray-200 dark:border-neutral-700 cursor-pointer transition-all hover:bg-gray-50 dark:hover:bg-neutral-800"
                 :class="{
-                  'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-700': selectedBucket?.name === bucket.name,
+                  'bg-gray-100 dark:bg-neutral-400/20 border-gray-300 dark:border-blue-700': selectedBucket?.name === bucket.name,
                 }"
                 @click="selectBucket(bucket)"
               >
@@ -157,7 +157,7 @@
           class="flex-1 flex flex-col overflow-hidden"
         >
           <!-- Bucket Header -->
-          <div class="p-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+          <div class="p-3 border-b border-gray-200 dark:border-neutral-700 bg-gray-50 dark:bg-neutral-800">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
                 <NIcon
@@ -210,7 +210,7 @@
               class="flex-1 flex flex-col overflow-hidden"
             >
               <!-- Table Controls -->
-              <div class="px-3 py-2 flex justify-between items-center bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+              <div class="px-3 py-2 flex justify-between items-center bg-gray-50 dark:bg-neutral-800 border-b border-gray-200 dark:border-neutral-700 flex-shrink-0">
                 <div class="flex items-center gap-3">
                   <div class="text-xs text-gray-600 dark:text-gray-400">
                     {{ bucketContentRows.length }} row{{
@@ -269,17 +269,17 @@
               </div>
 
               <!-- Data Table -->
-              <div class="flex-1 border border-gray-200 dark:border-gray-700 rounded-b-lg overflow-auto">
+              <div class="flex-1 border border-gray-200 dark:border-neutral-700 rounded-b-lg overflow-auto">
                 <table class="w-full min-w-max">
-                  <thead class="bg-gray-50 dark:bg-gray-800 sticky top-0">
+                  <thead class="bg-gray-50 dark:bg-neutral-800 sticky top-0">
                     <tr>
                       <th
                         v-for="header in table.getFlatHeaders()"
                         :key="header.id"
-                        class="px-2 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 tracking-wider border-r border-gray-200 dark:border-gray-700 last:border-r-0 relative overflow-hidden"
+                        class="px-2 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 tracking-wider border-r border-gray-200 dark:border-neutral-700 last:border-r-0 relative overflow-hidden"
                         :class="
                           header.column.getCanSort()
-                            ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700'
+                            ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-neutral-700'
                             : ''
                         "
                         :style="{
@@ -323,17 +323,17 @@
                     </tr>
                   </thead>
                   <tbody
-                    class="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700"
+                    class="bg-white dark:bg-neutral-900 border-t border-gray-200 dark:border-neutral-700"
                   >
                     <tr
                       v-for="row in table.getRowModel().rows"
                       :key="row.id"
-                      class="hover:bg-gray-50 dark:hover:bg-gray-800 border-b border-gray-200 dark:border-gray-700"
+                      class="hover:bg-gray-50 dark:hover:bg-neutral-800 border-b border-gray-200 dark:border-neutral-700"
                     >
                       <td
                         v-for="cell in row.getVisibleCells()"
                         :key="cell.id"
-                        class="px-2 py-3 text-sm text-gray-900 dark:text-gray-100 border-r border-gray-200 dark:border-gray-700 last:border-r-0 overflow-hidden"
+                        class="px-2 py-3 text-sm text-gray-900 dark:text-gray-100 border-r border-gray-200 dark:border-neutral-700 last:border-r-0 overflow-hidden"
                         :style="{
                           width: `${cell.column.getSize()}px`,
                           maxWidth: `${cell.column.getSize()}px`,

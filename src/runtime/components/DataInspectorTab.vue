@@ -21,7 +21,7 @@
       >
         <div class="flex-1 flex flex-col overflow-hidden">
           <!-- Search Bar -->
-          <div class="p-2 border-b border-gray-200 dark:border-gray-700">
+          <div class="p-2 border-b border-gray-200 dark:border-neutral-700">
             <NTextInput
               v-model="searchQuery"
               n="xs"
@@ -58,9 +58,9 @@
                 "
               >
                 <div
-                  class="flex items-center gap-2 py-1 px-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 w-full"
+                  class="flex items-center gap-2 py-1 px-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-neutral-700 w-full"
                   :class="{
-                    'bg-gray-300 dark:bg-gray-700 font-semibold':
+                    'bg-gray-300 dark:bg-neutral-700 font-semibold':
                       isSelected && item.value.type !== 'folder',
                     'font-medium': item.value.type === 'folder',
                   }"
@@ -75,10 +75,11 @@
                           : 'carbon:folder'
                         : item.value.icon
                     "
+                    n="sm"
                     class="flex-shrink-0"
                     :class="
                       item.value.type === 'folder'
-                        ? 'text-blue-500'
+                        ? 'text-indigo-500'
                         : 'text-gray-500'
                     "
                   />
@@ -159,7 +160,7 @@
               <textarea
                 ref="textareaRef"
                 v-model="query"
-                class="absolute inset-0 w-full h-full resize-none bg-transparent outline-none border-none overflow-auto editor-textarea"
+                class="absolute inset-0 w-full h-full resize-none bg-transparent outline-none border-none overflow-auto editor-textarea dark:placeholder:text-gray-400"
                 style="
                   color: rgba(0, 0, 0, 0.01);
                   text-shadow: 0 0 0 transparent;
@@ -207,7 +208,7 @@
               class="flex-1 flex flex-col overflow-hidden"
             >
               <div
-                class="px-3 py-2 flex justify-between items-center bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex-shrink-0"
+                class="px-3 py-2 flex justify-between items-center bg-gray-50 dark:bg-neutral-800 border-b border-gray-200 dark:border-neutral-700 flex-shrink-0"
               >
                 <NButton
                   n="xs"
@@ -235,7 +236,7 @@
             >
               <!-- Results summary -->
               <div
-                class="px-3 py-2 flex justify-between items-center bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex-shrink-0"
+                class="px-3 py-2 flex justify-between items-center bg-gray-50 dark:bg-neutral-800 border-b border-gray-200 dark:border-neutral-700 flex-shrink-0"
               >
                 <div class="flex items-center gap-3">
                   <NButton
@@ -305,18 +306,18 @@
 
               <!-- Data Table -->
               <div
-                class="flex-1 border border-gray-200 dark:border-gray-700 rounded-b-lg overflow-auto"
+                class="flex-1 border border-gray-200 dark:border-neutral-700 rounded-b-lg overflow-auto"
               >
                 <table class="w-full min-w-max">
-                  <thead class="bg-gray-50 dark:bg-gray-800 sticky top-0">
+                  <thead class="bg-gray-50 dark:bg-neutral-950 sticky top-0">
                     <tr>
                       <th
                         v-for="header in table.getFlatHeaders()"
                         :key="header.id"
-                        class="px-2 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 tracking-wider border-r border-gray-200 dark:border-gray-700 last:border-r-0 relative overflow-hidden"
+                        class="px-2 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 tracking-wider border-r border-gray-200 dark:border-neutral-700 last:border-r-0 relative overflow-hidden"
                         :class="
                           header.column.getCanSort()
-                            ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700'
+                            ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-neutral-700'
                             : ''
                         "
                         :style="{
@@ -347,7 +348,7 @@
                         <!-- Column Resize Handle -->
                         <div
                           v-if="header.column.getCanResize()"
-                          class="absolute top-0 right-0 h-full w-1 cursor-col-resize bg-transparent hover:bg-gray-500 hover:bg-opacity-50 group"
+                          class="absolute top-0 right-0 h-full w-1 cursor-col-resize bg-transparent hover:bg-neutral-500 hover:bg-opacity-50 group"
                           @mousedown="header.getResizeHandler()?.($event)"
                           @touchstart="header.getResizeHandler()?.($event)"
                           @click.stop
@@ -360,17 +361,17 @@
                     </tr>
                   </thead>
                   <tbody
-                    class="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700"
+                    class="bg-white dark:bg-neutral-900 border-t border-gray-200 dark:border-neutral-700"
                   >
                     <tr
                       v-for="row in table.getRowModel().rows"
                       :key="row.id"
-                      class="hover:bg-gray-50 dark:hover:bg-gray-800 border-b border-gray-200 dark:border-gray-700"
+                      class="hover:bg-gray-50 dark:hover:bg-neutral-800 border-b border-gray-200 dark:border-neutral-700"
                     >
                       <td
                         v-for="cell in row.getVisibleCells()"
                         :key="cell.id"
-                        class="px-2 py-3 text-sm text-gray-900 dark:text-gray-100 border-r border-gray-200 dark:border-gray-700 last:border-r-0 overflow-hidden"
+                        class="px-2 py-3 text-sm text-gray-900 dark:text-gray-100 border-r border-gray-200 dark:border-neutral-700 last:border-r-0 overflow-hidden"
                         :style="{
                           width: `${cell.column.getSize()}px`,
                           maxWidth: `${cell.column.getSize()}px`,
@@ -398,7 +399,7 @@
               class="flex-1 flex flex-col overflow-hidden"
             >
               <div
-                class="px-3 py-2 flex justify-between items-center bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex-shrink-0"
+                class="px-3 py-2 flex justify-between items-center bg-gray-50 dark:bg-neutral-800 border-b border-gray-200 dark:border-neutral-700 flex-shrink-0"
               >
                 <NButton
                   n="xs"
@@ -439,6 +440,7 @@ import {
   TreeItem,
   TreeRoot,
 } from 'reka-ui'
+import { asyncComputed } from '@vueuse/core'
 
 import {
   FlexRender,
@@ -447,6 +449,8 @@ import {
   getSortedRowModel,
   getPaginationRowModel,
 } from '@tanstack/vue-table'
+
+import { ref, computed, watch, onMounted } from 'vue'
 
 import { codeToHtml } from 'shiki'
 import Fuse from 'fuse.js'
@@ -793,6 +797,10 @@ watch(selectedEntry, () => {
   display: inline-block;
   text-align: right;
   color: rgba(115, 138, 148, 0.4);
+}
+
+.dark .syntax-highlight-bg code .line::before {
+  color: hsl(0, 10%, 82%);
 }
 
 /* Textarea styling to match exactly */

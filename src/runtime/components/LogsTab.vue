@@ -10,7 +10,7 @@
   >
     <!-- Toolbar -->
     <div
-      class="flex items-center justify-between gap-3 px-3 py-2 border-b border-gray-200 dark:border-gray-700"
+      class="flex items-center justify-between gap-3 px-3 py-2 border-b border-gray-200 dark:border-neutral-700"
     >
       <div class="flex items-center gap-2 flex-1">
         <NTextInput
@@ -23,7 +23,7 @@
 
         <select
           v-model="selectedLevel"
-          class="px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800"
+          class="px-2 py-1 text-xs border border-gray-300 dark:border-neutral-600 rounded bg-white dark:bg-neutral-800"
         >
           <option value="all">
             All Levels
@@ -72,7 +72,7 @@
         v-else
         class="w-full"
       >
-        <thead class="sticky top-0 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 z-10">
+        <thead class="sticky top-0 bg-gray-50 dark:bg-neutral-900 border-b border-gray-200 dark:border-neutral-700 z-10">
           <tr>
             <th class="px-2 py-1.5 text-left text-xs font-medium text-gray-500 dark:text-gray-400 w-8" />
             <th class="px-2 py-1.5 text-left text-xs font-medium text-gray-500 dark:text-gray-400 w-32">
@@ -96,7 +96,7 @@
             :key="log.key"
           >
             <tr
-              class="log-entry hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer border-b border-b-gray-100 dark:border-b-gray-800"
+              class="log-entry hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer border-b border-b-gray-100 dark:border-b-neutral-800"
               @click="toggleExpand(log.key)"
             >
               <td class="px-2 py-1.5">
@@ -137,7 +137,7 @@
             </tr>
             <tr
               v-if="expandedLogs.has(log.key) && hasExtraData(log)"
-              class="bg-gray-50 dark:bg-gray-900/50"
+              class="bg-gray-50 dark:bg-neutral-900/50"
             >
               <td colspan="12">
                 <div class="px-10 py-2">
@@ -148,7 +148,7 @@
                     />
                     <span class="text-xs text-gray-600 dark:text-gray-400">JSON</span>
                   </div>
-                  <div class="bg-white dark:bg-gray-800 p-3 rounded border border-gray-200 dark:border-gray-700 overflow-x-auto">
+                  <div class="bg-white dark:bg-neutral-800 p-3 rounded border border-gray-200 dark:border-neutral-700 overflow-x-auto">
                     <div
                       class="json-code-block text-xs"
                       v-html="highlightedJson.get(log.key)"
@@ -431,5 +431,9 @@ async function clearLogs() {
   display: inline-block;
   text-align: right;
   color: rgba(115, 138, 148, 0.4);
+}
+
+.dark .json-code-block code .line::before {
+  color: hsl(0, 2%, 51%);
 }
 </style>
