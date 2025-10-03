@@ -107,7 +107,9 @@
   <SyncStatusTab v-if="selectedTab === 'sync-status'" />
   <DataInspectorTab v-if="selectedTab === 'data'" />
   <ConfigInspectorTab v-if="selectedTab === 'config'" />
+  <BucketsInspectorTab v-if="selectedTab === 'buckets'" />
   <LogsTab v-if="selectedTab === 'logs'" />
+  <PowerSyncInstanceTab v-if="selectedTab === 'powersync-instance'" />
 </template>
 
 <script setup lang="ts">
@@ -118,6 +120,8 @@ import SyncStatusTab from '../components/SyncStatusTab.vue'
 import DataInspectorTab from '../components/DataInspectorTab.vue'
 import ConfigInspectorTab from '../components/ConfigInspectorTab.vue'
 import LogsTab from '../components/LogsTab.vue'
+import BucketsInspectorTab from '../components/BucketsInspectorTab.vue'
+import PowerSyncInstanceTab from '../components/PowerSyncInstanceTab.vue'
 
 definePageMeta({
   layout: 'powersync-inspector-layout',
@@ -152,8 +156,10 @@ const handleTabChange = (tab: string) => {
 const tabs = [
   { label: 'Sync Status', value: 'sync-status' },
   { label: 'Data Inspector', value: 'data' },
+  { label: 'Buckets Inspector', value: 'buckets' },
   { label: 'Config Inspector', value: 'config' },
-  { label: 'Logs', value: 'logs' },
+  { label: 'Client Logs', value: 'logs' },
+  { label: 'PowerSync Instance', value: 'powersync-instance' },
 ]
 
 const lastSyncedFormatted = computed(() =>
