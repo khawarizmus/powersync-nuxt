@@ -35,7 +35,7 @@ export const useDiagnosticsLogger = (callback?: () => void | Promise<void>) => {
     const mainMessage = String(messageArray[0] || 'Empty log message')
     const extraData = messageArray.slice(1).reduce((acc, curr) => ({ ...acc, ...curr }), {})
 
-    consola[level.toLowerCase() as LogType](`[PowerSync] ${context.name ? `[${context.name}]` : ''} ${mainMessage}`, extraData)
+    consola[level.toLowerCase() as LogType](`[PowerSync] ${context.name ? `[${context.name}]` : ''} ${mainMessage}`, extraData, context)
     // user defined callback
     await callback?.()
   })

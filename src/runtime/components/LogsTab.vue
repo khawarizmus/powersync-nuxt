@@ -79,6 +79,9 @@
               Time
             </th>
             <th class="px-2 py-1.5 text-left text-xs font-medium text-gray-500 dark:text-gray-400 w-20">
+              Source
+            </th>
+            <th class="px-2 py-1.5 text-left text-xs font-medium text-gray-500 dark:text-gray-400 w-20">
               Level
             </th>
             <th class="px-2 py-1.5 text-left text-xs font-medium text-gray-500 dark:text-gray-400">
@@ -87,13 +90,13 @@
             <th class="px-2 py-1.5 text-left text-xs font-medium text-gray-500 dark:text-gray-400 w-16" />
           </tr>
         </thead>
-        <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+        <tbody>
           <template
             v-for="log in filteredLogs"
             :key="log.key"
           >
             <tr
-              class="log-entry hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
+              class="log-entry hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer border-b border-b-gray-100 dark:border-b-gray-800"
               @click="toggleExpand(log.key)"
             >
               <td class="px-2 py-1.5">
@@ -106,6 +109,11 @@
                 <span class="text-xs font-mono text-gray-600 dark:text-gray-400">
                   {{ log.value ? formatTime(log.value.date) : '' }}
                 </span>
+              </td>
+              <td class="px-2 py-1.5">
+                <div class="text-xs text-gray-700 dark:text-gray-300 truncate max-w-3xl">
+                  {{ getLogSource(log) }}
+                </div>
               </td>
               <td class="px-2 py-1.5">
                 <NBadge
@@ -122,8 +130,8 @@
               <td class="px-2 py-1.5 text-center">
                 <NIcon
                   v-if="hasExtraData(log)"
-                  :icon="expandedLogs.has(log.key) ? 'carbon:chevron-up' : 'carbon:chevron-down'"
-                  class="text-gray-400 text-xs"
+                  :icon="expandedLogs.has(log.key) ? 'carbon:chevron-up' : 'carbon:constraint'"
+                  class="text-gray-600 text-xs"
                 />
               </td>
             </tr>
@@ -133,6 +141,14 @@
             >
               <td colspan="5">
                 <div class="px-10 py-2">
+                  <div class="inline-flex items-center gap-2">
+                    <NIcon
+                      n="sm"
+                      icon="carbon:object"
+                    />
+
+                    JSON
+                  </div>
                   <div class="text-xs font-mono bg-white dark:bg-gray-800 p-3 rounded border border-gray-200 dark:border-gray-700 overflow-x-auto">
                     <pre class="text-gray-600 dark:text-gray-400">{{ formatExtraData(log) }}</pre>
                   </div>
@@ -151,18 +167,11 @@ import { useDiagnosticsLogger } from '#imports'
 import { ref, computed } from 'vue'
 import { asyncComputed } from '@vueuse/core'
 import Fuse from 'fuse.js'
-
-interface LogValue {
-  date: string
-  args: any[]
-  type: string
-  level: number
-  tag: string
-}
+import type { LogObject } from 'consola'
 
 interface LogItem {
   key: string
-  value: LogValue | null
+  value: LogObject | null
 }
 
 const { logsStorage } = useDiagnosticsLogger()
@@ -246,16 +255,25 @@ function getLogMessage(log: LogItem): string {
   return String(log.value.args[0] || 'Empty log message')
 }
 
+function getLogSource(log: LogItem): string {
+  return log.value?.args[2]?.name || ''
+}
+
 function hasExtraData(log: LogItem): boolean {
-  return !!(log.value?.args && log.value.args.length > 1)
+  return !!(
+    log.value?.args
+    && log.value.args.length > 2
+    && log.value.args[1]
+    && !(typeof log.value.args[1] === 'object' && log.value.args[1] !== null && Object.keys(log.value.args[1]).length === 0)
+  )
 }
 
 function formatExtraData(log: LogItem): string {
   if (!log.value?.args || log.value.args.length <= 1) return ''
-  return JSON.stringify(log.value.args.slice(1), null, 2)
+  return JSON.stringify(log.value.args[1], null, 2)
 }
 
-function formatTime(date: string): string {
+function formatTime(date: string | Date): string {
   return new Date(date).toLocaleTimeString('en-US', {
     hour12: false,
     hour: '2-digit',
