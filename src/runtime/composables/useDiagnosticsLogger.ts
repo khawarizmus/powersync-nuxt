@@ -2,6 +2,9 @@ import { createBaseLogger, LogLevel } from '@powersync/web'
 import { createConsola, type LogType } from 'consola'
 import { createStorage } from 'unstorage'
 import localStorageDriver from 'unstorage/drivers/session-storage'
+import mitt from 'mitt'
+
+const emitter = mitt()
 
 const logsStorage = createStorage({
   driver: localStorageDriver({ base: 'powersync:' }),
@@ -20,7 +23,9 @@ const consola = createConsola({
 
 consola.addReporter({
   log: async (logObject) => {
-    await logsStorage.set(`log:${logObject.date.toISOString()}`, logObject)
+    const key = `log:${logObject.date.toISOString()}`
+    await logsStorage.set(key, logObject)
+    emitter.emit('log', { key, value: logObject })
   },
 })
 
@@ -40,5 +45,5 @@ export const useDiagnosticsLogger = (callback?: () => void | Promise<void>) => {
     await callback?.()
   })
 
-  return { logger, logsStorage }
+  return { logger, logsStorage, emitter }
 }

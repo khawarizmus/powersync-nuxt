@@ -38,6 +38,9 @@ importers:
       fuse.js:
         specifier: ^7.1.0
         version: 7.1.0
+      mitt:
+        specifier: ^3.0.1
+        version: 3.0.1
       powersync-nuxt:
         specifier: 'link:'
         version: 'link:'

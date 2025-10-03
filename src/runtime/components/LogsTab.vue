@@ -139,7 +139,7 @@
               v-if="expandedLogs.has(log.key) && hasExtraData(log)"
               class="bg-gray-50 dark:bg-gray-900/50"
             >
-              <td colspan="5">
+              <td colspan="12">
                 <div class="px-10 py-2">
                   <div class="inline-flex items-center gap-2">
                     <NIcon
@@ -164,8 +164,7 @@
 
 <script setup lang="ts">
 import { useDiagnosticsLogger } from '#imports'
-import { ref, computed } from 'vue'
-import { asyncComputed } from '@vueuse/core'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import Fuse from 'fuse.js'
 import type { LogObject } from 'consola'
 
@@ -174,26 +173,37 @@ interface LogItem {
   value: LogObject | null
 }
 
-const { logsStorage } = useDiagnosticsLogger()
+const { logsStorage, emitter } = useDiagnosticsLogger()
 
 const searchQuery = ref('')
 const selectedLevel = ref('all')
 const expandedLogs = ref<Set<string>>(new Set())
+const logs = ref<LogItem[]>([])
 
-// Load all logs with computed
-const logs = asyncComputed<LogItem[]>(async () => {
+// Load initial logs
+async function loadInitialLogs() {
   const keys = await logsStorage.getKeys('log:')
-  const items = await logsStorage.getItems(
-    keys.map(key => ({ key })),
-  ) as LogItem[]
-
-  // Sort by date (newest first)
-  return items.sort((a, b) => {
+  const items = await logsStorage.getItems(keys.map(key => ({ key }))) as LogItem[]
+  logs.value = items.sort((a, b) => {
     const dateA = a.value ? new Date(a.value.date).getTime() : 0
     const dateB = b.value ? new Date(b.value.date).getTime() : 0
     return dateB - dateA
   })
-}, [])
+}
+
+// Real-time log handler
+const handleLog = (event: any) => {
+  logs.value.unshift({ key: event.key, value: event.value })
+}
+
+onMounted(() => {
+  loadInitialLogs()
+  emitter.on('log', handleLog)
+})
+
+onUnmounted(() => {
+  emitter.off('log', handleLog)
+})
 
 // Initialize Fuse.js for fuzzy search
 const fuse = computed(() => {
@@ -312,6 +322,7 @@ function getLogBadgeColor(log: LogItem): string {
 async function clearLogs() {
   const keys = await logsStorage.getKeys('log:')
   await Promise.all(keys.map(key => logsStorage.removeItem(key)))
+  logs.value = []
   expandedLogs.value.clear()
 }
 </script>

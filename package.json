@@ -49,6 +49,7 @@
     "defu": "^6.1.4",
     "destr": "^2.0.5",
     "fuse.js": "^7.1.0",
+    "mitt": "^3.0.1",
     "powersync-nuxt": "link:",
     "reka-ui": "^2.5.0",
     "shiki": "^3.13.0",
