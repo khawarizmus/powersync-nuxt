@@ -1,4 +1,4 @@
-import { column, Schema, Table } from "@powersync/web";
+import { column, Schema, Table } from '@powersync/web'
 
 export const local_bucket_data = new Table(
   {
@@ -8,20 +8,20 @@ export const local_bucket_data = new Table(
     downloaded_operations: column.integer,
     downloading: column.integer,
   },
-  { localOnly: true }
-);
+  { localOnly: true },
+)
 
 export const local_schema = new Table(
   {
     data: column.text,
   },
-  { localOnly: true }
-);
+  { localOnly: true },
+)
 
 export const DiagnosticsAppSchema = new Schema({
   local_bucket_data,
   local_schema,
-});
+})
 
-export type Database = (typeof DiagnosticsAppSchema)["types"];
-export type LocalBucketData = Database["local_bucket_data"];
+export type Database = (typeof DiagnosticsAppSchema)['types']
+export type LocalBucketData = Database['local_bucket_data']
