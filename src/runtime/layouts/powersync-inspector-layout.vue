@@ -26,12 +26,13 @@
       </h1>
 
       <!-- Dark Mode Toggle -->
-      <NDarkToggle>
+      <NDarkToggle v-slot="{ isDark, toggle }">
         <NButton
           n="sm"
-          :icon="isDark ? 'carbon:moon' : 'carbon:sun'"
+          :icon="isDark.value ? 'carbon:moon' : 'carbon:sun'"
+          @click="toggle"
         >
-          {{ isDark ? "Dark" : "Light" }}
+          {{ isDark.value ? "Dark" : "Light" }}
         </NButton>
       </NDarkToggle>
     </div>
@@ -41,41 +42,7 @@
 </template>
 
 <script setup lang="ts">
-// import { useHead } from '#imports'
-import { ref, onUnmounted } from 'vue'
 import 'virtual:uno.css'
-
-// useHead({
-//   link: [
-//     {
-//       rel: 'stylesheet',
-//       href: 'https://cdn.jsdelivr.net/npm/@unocss/reset/tailwind.css',
-//     },
-//   ],
-// })
-
-// Dark mode state - this will be managed by NDarkToggle
-const isDark = ref(false)
-
-// Watch for system/manual dark mode changes and update our state
-if (import.meta.client) {
-  // Check initial state
-  isDark.value = document.documentElement.classList.contains('dark')
-
-  // Watch for changes
-  const observer = new MutationObserver(() => {
-    isDark.value = document.documentElement.classList.contains('dark')
-  })
-
-  observer.observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ['class'],
-  })
-
-  onUnmounted(() => {
-    observer.disconnect()
-  })
-}
 </script>
 
 <style scoped>
