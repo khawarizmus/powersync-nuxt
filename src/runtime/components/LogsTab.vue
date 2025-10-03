@@ -215,11 +215,14 @@ const fuse = computed(() => {
 
   return new Fuse(logs.value, {
     keys: [
-      { name: 'message', getFn: log => getLogMessage(log as LogItem) },
+      { name: 'message', getFn: log => getLogMessage(log as LogItem), weight: 2 },
       { name: 'type', getFn: log => (log as LogItem).value?.type || '' },
+      { name: 'extraData', getFn: log => getSearchableExtraData(log as LogItem), weight: 0.5 },
     ],
     threshold: 0.3,
     includeScore: true,
+    useExtendedSearch: true,
+    includeMatches: true,
   })
 })
 
@@ -300,6 +303,33 @@ function hasExtraData(log: LogItem): boolean {
 function formatExtraData(log: LogItem): string {
   if (!log.value?.args || log.value.args.length <= 1) return ''
   return JSON.stringify(log.value.args[1], null, 2)
+}
+
+// Extract searchable text from extra data
+function getSearchableExtraData(log: LogItem): string {
+  if (!log.value?.args || log.value.args.length <= 1) return ''
+  const data = log.value.args[1]
+  if (!data) return ''
+
+  // Simple approach: convert to JSON string and clean it
+  try {
+    const jsonStr = JSON.stringify(data)
+    // Remove JSON syntax characters and keep only content
+    const result = jsonStr
+      .replace(/[{}[\]",:]/g, ' ') // Replace JSON syntax with spaces
+      .replace(/\s+/g, ' ') // Collapse multiple spaces
+      .trim()
+
+    // Debug: log the result to see what we're searching
+    if (result && result.length > 0) {
+      console.log('Searchable extra data:', result)
+    }
+
+    return result
+  }
+  catch {
+    return String(data)
+  }
 }
 
 function formatTime(date: string | Date): string {
