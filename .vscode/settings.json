@@ -1,4 +1,5 @@
 {
+  "editor.gotoLocation.multipleDefinitions": "goto",
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "dbaeumer.vscode-eslint",
   "[javascript]": {

@@ -1,1 +1,1 @@
-export { PowerSyncDatabaseWithDiagnostics } from "./PowerSyncDatabaseWithDiagnostics";
+export { PowerSyncDatabaseWithDiagnostics } from './PowerSyncDatabaseWithDiagnostics'

@@ -7,7 +7,7 @@ import {
 import { SupabaseConnector } from '~/powersync/SuperbaseConnector'
 
 export default defineNuxtPlugin({
-  setup(nuxtApp) {
+  async setup(nuxtApp) {
     // const db = new PowerSyncDatabase({
     //   database: {
     //     dbFilename: 'a-db-name.sqlite',
@@ -24,12 +24,9 @@ export default defineNuxtPlugin({
 
     const connector = new SupabaseConnector()
 
-    db.connect(connector, {
+    await db.connect(connector, {
       clientImplementation: SyncClientImplementation.RUST,
     })
-
-    const { shareConnectorWithInspector } = usePowerSyncInspector()
-    shareConnectorWithInspector(nuxtApp, connector)
 
     const plugin = createPowerSyncPlugin({ database: db })
 

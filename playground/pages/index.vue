@@ -6,6 +6,7 @@ const user = asyncComputed(async () => await client.auth.getUser().then(res => r
 const toast = useToast()
 
 const db = usePowerSyncKysely<Database>()
+const { clearData } = usePowerSyncInspectorDiagnostics()
 
 const taskQuery = computed(() => db.selectFrom('tasks')
   .where('user_id', '=', user.value?.id ?? '')
@@ -67,10 +68,6 @@ const links = ref([
     target: '_blank',
   },
 ])
-
-// const refreshTasks = async () => {
-//   await powerSync.value.disconnectAndClear()
-// }
 </script>
 
 <template>
@@ -138,14 +135,14 @@ const links = ref([
                 </li>
               </ul>
             </UCard>
-            <!-- <div class="flex justify-end mt-4">
+            <div class="flex justify-end mt-4">
               <UButton
                 label="Clear & Re-sync"
                 color="neutral"
                 variant="link"
-                @click="refreshTasks()"
+                @click="clearData()"
               />
-            </div> -->
+            </div>
           </div>
         </div>
       </div>

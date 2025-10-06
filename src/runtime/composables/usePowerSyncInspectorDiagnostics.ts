@@ -1,16 +1,12 @@
 import { usePowerSync, useStatus } from '@powersync/vue'
 import type {
   PowerSyncBackendConnector,
+  PowerSyncConnectionOptions,
   UploadQueueStats,
 } from '@powersync/web'
 import { ref, computed, readonly, onMounted, onUnmounted } from 'vue'
 import { computedAsync } from '@vueuse/core'
 import { usePowerSyncInspector } from './usePowerSyncInspector'
-import { useNuxtApp } from '#imports'
-
-// types
-type AbstractPowerSyncBackendConnector
-  = PowerSyncBackendConnector extends infer T ? T : never
 
 type JSONValue
   = | string
@@ -108,12 +104,14 @@ function formatBytes(bytes: number, decimals = 2) {
 
 export function usePowerSyncInspectorDiagnostics() {
   const db = usePowerSync()
+
   const syncStatus = useStatus()
   const { getCurrentSchemaManager } = usePowerSyncInspector()
-  const nuxtApp = useNuxtApp()
 
   // reactive state
   const isDiagnosticSchemaSetup = ref(true)
+  const connectionOptions = computed(() => db.value.connectionOptions || null)
+  const connector = computed(() => db.value.connector || null)
   const hasSynced = ref(syncStatus.value?.hasSynced || false)
   const isConnected = ref(syncStatus.value?.connected || false)
   const isSyncing = ref(false)
@@ -161,21 +159,10 @@ export function usePowerSyncInspectorDiagnostics() {
     ),
   }))
 
-  const connector = computed<AbstractPowerSyncBackendConnector | null>(() => {
-    const connector
-      = nuxtApp.vueApp.config.globalProperties.$inspectorPowerSyncConnector
-    return connector as AbstractPowerSyncBackendConnector | null
-  })
-  const moduleOptions = computed(() => {
-    const options
-      = nuxtApp.vueApp.config.globalProperties.$inspectorPowerSyncModuleOptions
-    return options
-  })
-
   const userID = computedAsync(async () => {
     try {
       // @ts-expect-error - connector to be double ref or something
-      const token = (await connector.value?.value.fetchCredentials())?.token
+      const token = (await connector.value.fetchCredentials())?.token
 
       if (!token) return null
 
@@ -203,16 +190,16 @@ export function usePowerSyncInspectorDiagnostics() {
   const uploadQueueCount = computed(() => uploadQueueStats.value?.count ?? 0)
 
   // functions
-  const clearData = () => {
-    db.value.syncStreamImplementation?.disconnect()
-    db.value?.disconnectAndClear()
+  const clearData = async () => {
+    const connector = db.value.connector as PowerSyncBackendConnector
+    const connectionOptions = db.value.connectionOptions as PowerSyncConnectionOptions
+    await db.value?.disconnectAndClear()
     const schemaManager = getCurrentSchemaManager()
     schemaManager.clear()
     schemaManager.refreshSchema(db.value.database)
-    console.log('connecting to db')
-    db.value.connect(
-      connector.value!,
-      moduleOptions.value?.defaultConnectionParams,
+    await db.value.connect(
+      connector,
+      connectionOptions,
     )
   }
 
@@ -222,16 +209,20 @@ export function usePowerSyncInspectorDiagnostics() {
         'SELECT powersync_last_synced_at() as synced_at',
       )
 
+      console.log('synced_at', synced_at)
+
       uploadQueueStats.value = await db.value?.getUploadQueueStats(true)
 
       if (synced_at != null && !syncStatus.value?.dataFlowStatus.downloading) {
         // These are potentially expensive queries - do not run during initial sync
         bucketRows.value = await db.value.getAll(BUCKETS_QUERY)
+        console.log('bucketRows downloading', bucketRows.value)
         tableRows.value = await db.value.getAll(TABLES_QUERY)
       }
       else if (synced_at != null) {
         // Busy downloading, but have already synced once
         bucketRows.value = await db.value.getAll(BUCKETS_QUERY_FAST)
+        console.log('bucketRows synced fast', bucketRows.value)
         // Load tables if we haven't yet
         if (tableRows.value == null) {
           tableRows.value = await db.value.getAll(TABLES_QUERY)
@@ -240,6 +231,7 @@ export function usePowerSyncInspectorDiagnostics() {
       else {
         // Fast query to show progress during initial sync / while downloading bulk data
         bucketRows.value = await db.value.getAll(BUCKETS_QUERY_FAST)
+        console.log('bucketRows initial sync fast', bucketRows.value)
         tableRows.value = null
       }
     }
@@ -323,6 +315,7 @@ export function usePowerSyncInspectorDiagnostics() {
   return {
     db,
     connector,
+    connectionOptions,
     isDiagnosticSchemaSetup: readonly(isDiagnosticSchemaSetup),
     syncStatus: readonly(syncStatus),
     hasSynced: readonly(hasSynced),

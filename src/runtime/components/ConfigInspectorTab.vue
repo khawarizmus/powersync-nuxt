@@ -11,12 +11,28 @@
       class="h-full"
     >
       <NSectionBlock
-        icon="carbon:parameter"
-        text="Query Parameters"
+        icon="carbon:connection-signal"
+        text="Connection Options"
       >
-        <div>
-          <pre>{{ connectionOptions }}</pre>
-        </div>
+        <div
+          class="text-sm schema-code-block h-full overflow-auto"
+          v-html="connectionOptionsHtml"
+        />
+      </NSectionBlock>
+
+      <span
+        border="b"
+        border-color="gray-100"
+      />
+
+      <NSectionBlock
+        icon="carbon:cics-db2-connection"
+        text="Database Options"
+      >
+        <div
+          class="text-sm schema-code-block h-full overflow-auto"
+          v-html="dbOptionsHtml"
+        />
       </NSectionBlock>
 
       <span
@@ -31,7 +47,7 @@
       >
         <div
           class="text-sm schema-code-block h-full overflow-auto"
-          v-html="html"
+          v-html="schemaHtml"
         />
       </NSectionBlock>
     </div>
@@ -39,6 +55,8 @@
 </template>
 
 <script setup lang="ts">
+import type {
+  PowerSyncDatabaseWithDiagnostics } from '#imports'
 import {
   usePowerSyncInspectorDiagnostics,
   usePowerSyncInspector,
@@ -47,11 +65,19 @@ import { computed, onMounted } from 'vue'
 import { codeToHtml } from 'shiki'
 import { asyncComputed } from '@vueuse/core'
 
-const { db } = usePowerSyncInspectorDiagnostics()
+const { db, connectionOptions } = usePowerSyncInspectorDiagnostics()
 const { getCurrentSchemaManager } = usePowerSyncInspector()
 const schemaManager = getCurrentSchemaManager()
 
-// const connectionOptions = computed(() => db.value?.co)
+const currentConnectionOptions = computed(() => {
+  const { serializedSchema: _, ...options } = connectionOptions.value!
+  return options
+})
+
+const dbOptions = computed(() => {
+  const { logger: _, schema: __, ...dbOptions } = (db.value as PowerSyncDatabaseWithDiagnostics).dbOptions
+  return dbOptions
+})
 
 const schema = computed(() => {
   return `/**
@@ -65,7 +91,29 @@ const schema = computed(() => {
 ${schemaManager.schemaToString()}`
 })
 
-const html = asyncComputed(
+const connectionOptionsHtml = asyncComputed(
+  async () =>
+    await codeToHtml(JSON.stringify(currentConnectionOptions.value, null, 2), {
+      lang: 'typescript',
+      themes: {
+        light: 'one-light',
+        dark: 'min-dark',
+      },
+    }),
+)
+
+const dbOptionsHtml = asyncComputed(
+  async () =>
+    await codeToHtml(JSON.stringify(dbOptions.value, null, 2), {
+      lang: 'typescript',
+      themes: {
+        light: 'one-light',
+        dark: 'min-dark',
+      },
+    }),
+)
+
+const schemaHtml = asyncComputed(
   async () =>
     await codeToHtml(schema.value, {
       lang: 'typescript',

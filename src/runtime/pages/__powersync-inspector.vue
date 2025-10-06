@@ -71,7 +71,7 @@
       <NButton
         n="red sm"
         icon="carbon:clean"
-        @click="clearData"
+        @click="resync"
       >
         Prune & Re-sync
       </NButton>
@@ -163,8 +163,13 @@ const tabs = [
 ]
 
 const lastSyncedFormatted = computed(() =>
-  useTimeAgo(new Date(lastSyncedAt.value)),
+  lastSyncedAt.value ? useTimeAgo(new Date(lastSyncedAt.value)) : 'NA',
 )
+
+const resync = async () => {
+  await clearData()
+  await db.value?.waitForFirstSync()
+}
 </script>
 
 <style>
