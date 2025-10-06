@@ -50,6 +50,7 @@ WITH
 
 SELECT
   local.id as name,
+  ps_buckets.id as id,
   stats.tables,
   stats.data_size,
   stats.metadata_size,
@@ -62,13 +63,10 @@ FROM local_bucket_data local
 LEFT JOIN ps_buckets ON ps_buckets.name = local.id
 LEFT JOIN oplog_stats stats ON stats.bucket_id = ps_buckets.id`
 
-const TABLES_QUERY = `
-SELECT row_type as name, count() as count, sum(length(data)) as size FROM ps_oplog GROUP BY row_type
-`
-
 const BUCKETS_QUERY_FAST = `
 SELECT
   local.id as name,
+  ps_buckets.id as id,
   '[]' as tables,
   0 as data_size,
   0 as metadata_size,
@@ -77,7 +75,12 @@ SELECT
   local.downloaded_operations,
   local.total_operations,
   local.downloading
-FROM local_bucket_data local`
+FROM local_bucket_data local
+LEFT JOIN ps_buckets ON ps_buckets.name = local.id`
+
+const TABLES_QUERY = `
+SELECT row_type as name, count() as count, sum(length(data)) as size FROM ps_oplog GROUP BY row_type
+`
 
 function formatBytes(bytes: number, decimals = 2) {
   if (!+bytes) return '0 Bytes'
@@ -118,7 +121,7 @@ export function usePowerSyncInspectorDiagnostics() {
     syncStatus.value?.dataFlowStatus.downloading || false,
   )
   const isUploading = ref(syncStatus.value?.dataFlowStatus.uploading || false)
-  const lastSyncedAt = ref(syncStatus.value?.lastSyncedAt || '')
+  const lastSyncedAt = ref<Date | null>(syncStatus.value?.lastSyncedAt || null)
   const uploadError = ref(syncStatus.value?.dataFlowStatus.uploadError || null)
   const downloadError = ref(
     syncStatus.value?.dataFlowStatus.downloadError || null,
@@ -254,7 +257,7 @@ export function usePowerSyncInspectorDiagnostics() {
         isConnected.value = !!newStatus.connected
         isDownloading.value = !!newStatus.dataFlowStatus.downloading
         isUploading.value = !!newStatus.dataFlowStatus.uploading
-        lastSyncedAt.value = newStatus.lastSyncedAt || ''
+        lastSyncedAt.value = newStatus.lastSyncedAt || null
         uploadError.value = newStatus.dataFlowStatus.uploadError || null
         downloadError.value = newStatus.dataFlowStatus.downloadError || null
         downloadProgressDetails.value
