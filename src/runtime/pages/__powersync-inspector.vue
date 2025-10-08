@@ -159,7 +159,7 @@ const tabs = [
   { label: 'Buckets Inspector', value: 'buckets' },
   { label: 'Config Inspector', value: 'config' },
   { label: 'Client Logs', value: 'logs' },
-  { label: 'PowerSync Instance', value: 'powersync-instance' },
+  // { label: 'PowerSync Instance', value: 'powersync-instance' },
 ]
 
 const lastSyncedFormatted = computed(() =>
