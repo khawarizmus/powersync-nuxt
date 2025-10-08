@@ -48,9 +48,7 @@ export default defineNuxtConfig({
   },
 
   powersync: {
-    defaultConnectionParams: {
-      // add the default connection params
-    },
+    useDiagnostics: true,
   },
 
   supabase: {

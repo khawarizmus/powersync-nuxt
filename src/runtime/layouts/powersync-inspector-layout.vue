@@ -37,12 +37,23 @@
       </NDarkToggle>
     </div>
 
-    <slot />
+    <slot v-if="useDiagnostics" />
+    <div v-else>
+      <NTip
+        n="red6 dark:red5"
+        icon="carbon:warning-alt"
+      >
+        Enable diagnostics in your Nuxt config to use the inspector.
+      </NTip>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { useRuntimeConfig } from '#imports'
 import 'virtual:uno.css'
+
+const useDiagnostics = useRuntimeConfig().public.powerSyncModuleOptions.useDiagnostics ?? false
 </script>
 
 <style scoped>

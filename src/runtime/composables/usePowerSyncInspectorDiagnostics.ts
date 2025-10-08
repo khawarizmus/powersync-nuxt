@@ -191,12 +191,13 @@ export function usePowerSyncInspectorDiagnostics() {
 
   // functions
   const clearData = async () => {
+    await db.value?.syncStreamImplementation?.disconnect()
     const connector = db.value.connector as PowerSyncBackendConnector
     const connectionOptions = db.value.connectionOptions as PowerSyncConnectionOptions
     await db.value?.disconnectAndClear()
     const schemaManager = getCurrentSchemaManager()
-    schemaManager.clear()
-    schemaManager.refreshSchema(db.value.database)
+    await schemaManager.clear()
+    await schemaManager.refreshSchema(db.value.database)
     await db.value.connect(
       connector,
       connectionOptions,

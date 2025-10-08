@@ -1,21 +1,17 @@
-// import { fileURLToPath } from "node:url";
 import {
   defineNuxtModule,
   createResolver,
   addPlugin,
   addImports,
   extendPages,
-  installModule,
+  // installModule,
   addLayout,
   addComponentsDir,
+  installModule,
 } from '@nuxt/kit'
 import { defu } from 'defu'
 import { setupDevToolsUI } from './devtools'
 import { addImportsFrom } from './runtime/utils/addImportsFrom'
-
-// function rPath(p: string) {
-//   return fileURLToPath(new URL(p, import.meta.url).toString());
-// }
 
 type JSONValue
   = | string
@@ -31,32 +27,33 @@ interface JSONObject {
 type JSONArray = JSONValue[]
 
 // Module options TypeScript interface definition
-export interface PowerSyncModuleOptions {
+export interface PowerSyncNuxtModuleOptions {
   /**
-   * default powersync connection params
+   * enable diagnostics
    *
-   * @default "undefined"
+   * @default "false"
    */
-  defaultConnectionParams?: undefined | Record<string, JSONValue>
+  useDiagnostics?: boolean
 }
 
-export default defineNuxtModule<PowerSyncModuleOptions>({
+export default defineNuxtModule<PowerSyncNuxtModuleOptions>({
   meta: {
     name: 'powersync-nuxt',
     configKey: 'powersync',
   },
   // Default configuration options of the Nuxt module
   defaults: {
-    defaultConnectionParams: undefined,
+    useDiagnostics: false,
   },
   async setup(options, nuxt) {
+    console.log('setup')
     const resolver = createResolver(import.meta.url)
 
     nuxt.options.runtimeConfig.public.powerSyncModuleOptions = defu(
 
       nuxt.options.runtimeConfig.public.powerSyncModuleOptions as any,
       {
-        defaultConnectionParams: options.defaultConnectionParams,
+        useDiagnostics: options.useDiagnostics,
       },
     )
 
