@@ -1,6 +1,45 @@
 # Changelog
 
 
+## v1.6.0
+
+[compare changes](https://github.com/khawarizmus/powersync-nuxt/compare/v1.5.0...v1.6.0)
+
+### 🚀 Enhancements
+
+- Proper pagination controll ([abb7732](https://github.com/khawarizmus/powersync-nuxt/commit/abb7732))
+- Added schema explorer ([db41de3](https://github.com/khawarizmus/powersync-nuxt/commit/db41de3))
+- Integrate consola for enhanced logging and add logs tab for diagnostics ([3cf919c](https://github.com/khawarizmus/powersync-nuxt/commit/3cf919c))
+- Real time logs ([2a4e206](https://github.com/khawarizmus/powersync-nuxt/commit/2a4e206))
+- Syntax highlight for logs ([077ea12](https://github.com/khawarizmus/powersync-nuxt/commit/077ea12))
+- Improve logs search ([079864c](https://github.com/khawarizmus/powersync-nuxt/commit/079864c))
+- Persist navigation on refresh using query params ([a3b4f56](https://github.com/khawarizmus/powersync-nuxt/commit/a3b4f56))
+- Add Buckets and PowerSync Instance tabs to powersync inspector ([bdbba84](https://github.com/khawarizmus/powersync-nuxt/commit/bdbba84))
+- WIP bucket explorer ([239a79b](https://github.com/khawarizmus/powersync-nuxt/commit/239a79b))
+- Enhance Buckets Inspector with tooltips and improved layout ([4d8826f](https://github.com/khawarizmus/powersync-nuxt/commit/4d8826f))
+- Added config inspector tab functionality ([fa8a83d](https://github.com/khawarizmus/powersync-nuxt/commit/fa8a83d))
+- Refactored the dx and cleaned up the code ([d327f1d](https://github.com/khawarizmus/powersync-nuxt/commit/d327f1d))
+
+### 🩹 Fixes
+
+- Fixed editor line numbers not aligning properly ([192bfb1](https://github.com/khawarizmus/powersync-nuxt/commit/192bfb1))
+- Expand tree when searching ([0c45a37](https://github.com/khawarizmus/powersync-nuxt/commit/0c45a37))
+- Fixed few styling issues ([04b3219](https://github.com/khawarizmus/powersync-nuxt/commit/04b3219))
+- Fixed some styling in the data inspector tab ([f80881c](https://github.com/khawarizmus/powersync-nuxt/commit/f80881c))
+- Fixed dark mode switcher ([1b21609](https://github.com/khawarizmus/powersync-nuxt/commit/1b21609))
+- Fixed dark mode styling ([0ee196e](https://github.com/khawarizmus/powersync-nuxt/commit/0ee196e))
+
+### 🏡 Chore
+
+- Upgrade deps ([91f7818](https://github.com/khawarizmus/powersync-nuxt/commit/91f7818))
+- Remove PowerSync Instance tab in powersync inspector ([d85cb3a](https://github.com/khawarizmus/powersync-nuxt/commit/d85cb3a))
+- Update version to 1.5.1 in package.json ([b034174](https://github.com/khawarizmus/powersync-nuxt/commit/b034174))
+
+### ❤️ Contributors
+
+- Amine <amine@powersync.com>
+- Khawarizmus <b.afatah@yahoo.com>
+
 ## v1.4.0
 
 [compare changes](https://github.com/khawarizmus/powersync-nuxt/compare/v1.3.0...v1.4.0)
