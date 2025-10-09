@@ -1,6 +1,23 @@
 # Changelog
 
 
+## v1.6.2
+
+[compare changes](https://github.com/khawarizmus/powersync-nuxt/compare/v1.6.1...v1.6.2)
+
+### 🩹 Fixes
+
+- Update dependencies and remove debug logs in inspector components ([d974aa7](https://github.com/khawarizmus/powersync-nuxt/commit/d974aa7))
+
+### 🏡 Chore
+
+- **release:** V1.6.1 ([b1af8f7](https://github.com/khawarizmus/powersync-nuxt/commit/b1af8f7))
+
+### ❤️ Contributors
+
+- Amine <amine@powersync.com>
+- Khawarizmus
+
 ## v1.6.1
 
 [compare changes](https://github.com/khawarizmus/powersync-nuxt/compare/v1.6.0...v1.6.1)
