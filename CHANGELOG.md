@@ -1,6 +1,23 @@
 # Changelog
 
 
+## v1.6.1
+
+[compare changes](https://github.com/khawarizmus/powersync-nuxt/compare/v1.6.0...v1.6.1)
+
+### 🩹 Fixes
+
+- Rename PowerSyncDatabaseWithDiagnostics to NuxtPowerSyncDatabase and update code highlighting language to JSON ([b737003](https://github.com/khawarizmus/powersync-nuxt/commit/b737003))
+
+### 🏡 Chore
+
+- **release:** V1.6.0 ([06cac7d](https://github.com/khawarizmus/powersync-nuxt/commit/06cac7d))
+
+### ❤️ Contributors
+
+- Amine <amine@powersync.com>
+- Khawarizmus
+
 ## v1.6.0
 
 [compare changes](https://github.com/khawarizmus/powersync-nuxt/compare/v1.5.0...v1.6.0)
