@@ -67,11 +67,11 @@ export default defineNuxtConfig({
     },
   },
 
-  unocss: {
-    autoImport: false,
-    preflight: true,
-    icons: true,
-    wind4: true,
-    attributify: true,
-  },
+  // unocss: {
+  //   autoImport: false,
+  //   preflight: true,
+  //   icons: true,
+  //   wind4: true,
+  //   attributify: true,
+  // },
 })

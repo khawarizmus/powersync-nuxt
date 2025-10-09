@@ -51,7 +51,7 @@
 
 <script setup lang="ts">
 import { useRuntimeConfig } from '#imports'
-import 'virtual:uno.css'
+import '../assets/powersync-inspector.css'
 
 const useDiagnostics = useRuntimeConfig().public.powerSyncModuleOptions.useDiagnostics ?? false
 </script>

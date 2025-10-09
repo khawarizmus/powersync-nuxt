@@ -50,6 +50,7 @@
     "@powersync/web": "^1.27.1",
     "@tanstack/vue-table": "^8.21.3",
     "@unocss/nuxt": "^66.5.2",
+    "unocss": "^66.5.2",
     "@vueuse/nuxt": "^13.9.0",
     "consola": "^3.4.2",
     "defu": "^6.1.4",

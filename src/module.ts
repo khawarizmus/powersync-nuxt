@@ -10,6 +10,12 @@ import {
   installModule,
 } from '@nuxt/kit'
 import { defu } from 'defu'
+import UnoCSS from 'unocss/vite'
+import {
+  presetWind4,
+  presetAttributify,
+  presetIcons,
+} from 'unocss'
 import { setupDevToolsUI } from './devtools'
 import { addImportsFrom } from './runtime/utils/addImportsFrom'
 
@@ -57,8 +63,24 @@ export default defineNuxtModule<PowerSyncNuxtModuleOptions>({
     )
 
     await installModule('@nuxt/devtools-ui-kit')
-    await installModule('@unocss/nuxt')
     await installModule('@vueuse/nuxt')
+
+    // Configure UnoCSS as a scoped Vite plugin
+    const unocssVitePlugin = UnoCSS({
+      mode: 'per-module',
+      configFile: false,
+      content: {
+        filesystem: [resolver.resolve('runtime/**/*.{vue,ts}')],
+      },
+      presets: [
+        presetWind4(),
+        presetAttributify(),
+        presetIcons(),
+      ],
+    })
+
+    nuxt.options.vite.plugins = nuxt.options.vite.plugins || []
+    nuxt.options.vite.plugins.push(unocssVitePlugin)
 
     addPlugin(resolver.resolve('./runtime/plugin.client'))
 
