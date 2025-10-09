@@ -320,11 +320,6 @@ function getSearchableExtraData(log: LogItem): string {
       .replace(/\s+/g, ' ') // Collapse multiple spaces
       .trim()
 
-    // Debug: log the result to see what we're searching
-    if (result && result.length > 0) {
-      console.log('Searchable extra data:', result)
-    }
-
     return result
   }
   catch {

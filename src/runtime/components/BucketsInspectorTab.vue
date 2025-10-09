@@ -562,9 +562,7 @@ const loadBucketContent = async (bucket: any) => {
       ORDER BY op_id DESC
     `
 
-    console.log('query', query, bucket, [bucket.id])
     const result = await db.value.getAll(query, [bucket.id])
-    console.log('result', result)
     bucketContentRows.value = result
   }
   catch (error) {

@@ -56,7 +56,7 @@
 
 <script setup lang="ts">
 import type {
-  PowerSyncDatabaseWithDiagnostics } from '#imports'
+  NuxtPowerSyncDatabase } from '#imports'
 import {
   usePowerSyncInspectorDiagnostics,
   usePowerSyncInspector,
@@ -75,7 +75,7 @@ const currentConnectionOptions = computed(() => {
 })
 
 const dbOptions = computed(() => {
-  const { logger: _, schema: __, ...dbOptions } = (db.value as PowerSyncDatabaseWithDiagnostics).dbOptions
+  const { logger: _, schema: __, ...dbOptions } = (db.value as NuxtPowerSyncDatabase).dbOptions
   return dbOptions
 })
 

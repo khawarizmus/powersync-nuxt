@@ -46,7 +46,6 @@ export default defineNuxtModule<PowerSyncNuxtModuleOptions>({
     useDiagnostics: false,
   },
   async setup(options, nuxt) {
-    console.log('setup')
     const resolver = createResolver(import.meta.url)
 
     nuxt.options.runtimeConfig.public.powerSyncModuleOptions = defu(
@@ -126,7 +125,13 @@ export default defineNuxtModule<PowerSyncNuxtModuleOptions>({
 
     // Ensure the packages are transpiled
     nuxt.options.build.transpile = nuxt.options.build.transpile || []
-    nuxt.options.build.transpile.push('reka-ui', '@tanstack/vue-table')
+    nuxt.options.build.transpile.push('reka-ui', '@tanstack/vue-table', '@powersync/web', '@powersync/kysely-driver', '@journeyapps/wa-sqlite')
+
+    nuxt.hooks.hook('prepare:types', ({ references }: { references: any[] }) => {
+      references.push({ types: '@powersync/web' })
+      references.push({ types: '@powersync/kysely-driver' })
+      references.push({ types: '@journeyapps/wa-sqlite' })
+    })
 
     setupDevToolsUI(nuxt)
   },

@@ -210,20 +210,16 @@ export function usePowerSyncInspectorDiagnostics() {
         'SELECT powersync_last_synced_at() as synced_at',
       )
 
-      console.log('synced_at', synced_at)
-
       uploadQueueStats.value = await db.value?.getUploadQueueStats(true)
 
       if (synced_at != null && !syncStatus.value?.dataFlowStatus.downloading) {
         // These are potentially expensive queries - do not run during initial sync
         bucketRows.value = await db.value.getAll(BUCKETS_QUERY)
-        console.log('bucketRows downloading', bucketRows.value)
         tableRows.value = await db.value.getAll(TABLES_QUERY)
       }
       else if (synced_at != null) {
         // Busy downloading, but have already synced once
         bucketRows.value = await db.value.getAll(BUCKETS_QUERY_FAST)
-        console.log('bucketRows synced fast', bucketRows.value)
         // Load tables if we haven't yet
         if (tableRows.value == null) {
           tableRows.value = await db.value.getAll(TABLES_QUERY)
@@ -232,7 +228,6 @@ export function usePowerSyncInspectorDiagnostics() {
       else {
         // Fast query to show progress during initial sync / while downloading bulk data
         bucketRows.value = await db.value.getAll(BUCKETS_QUERY_FAST)
-        console.log('bucketRows initial sync fast', bucketRows.value)
         tableRows.value = null
       }
     }

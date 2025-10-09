@@ -55,7 +55,3 @@ import 'virtual:uno.css'
 
 const useDiagnostics = useRuntimeConfig().public.powerSyncModuleOptions.useDiagnostics ?? false
 </script>
-
-<style scoped>
-@import '@unocss/reset/tailwind.css';
-</style>
