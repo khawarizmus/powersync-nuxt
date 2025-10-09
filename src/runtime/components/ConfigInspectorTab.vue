@@ -94,9 +94,9 @@ ${schemaManager.schemaToString()}`
 const connectionOptionsHtml = asyncComputed(
   async () =>
     await codeToHtml(JSON.stringify(currentConnectionOptions.value, null, 2), {
-      lang: 'typescript',
+      lang: 'json',
       themes: {
-        light: 'one-light',
+        light: 'min-light',
         dark: 'min-dark',
       },
     }),
@@ -105,9 +105,9 @@ const connectionOptionsHtml = asyncComputed(
 const dbOptionsHtml = asyncComputed(
   async () =>
     await codeToHtml(JSON.stringify(dbOptions.value, null, 2), {
-      lang: 'typescript',
+      lang: 'json',
       themes: {
-        light: 'one-light',
+        light: 'min-light',
         dark: 'min-dark',
       },
     }),
@@ -118,7 +118,7 @@ const schemaHtml = asyncComputed(
     await codeToHtml(schema.value, {
       lang: 'typescript',
       themes: {
-        light: 'one-light',
+        light: 'min-light',
         dark: 'min-dark',
       },
     }),

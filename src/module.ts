@@ -65,9 +65,9 @@ export default defineNuxtModule<PowerSyncNuxtModuleOptions>({
 
     // expose the composables
     addImports({
-      name: 'PowerSyncDatabaseWithDiagnostics',
+      name: 'NuxtPowerSyncDatabase',
       from: resolver.resolve(
-        './runtime/utils/PowerSyncDatabaseWithDiagnostics',
+        './runtime/utils/NuxtPowerSyncDatabase',
       ),
     })
 
