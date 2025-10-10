@@ -1,6 +1,27 @@
 # Changelog
 
 
+## v1.7.0
+
+[compare changes](https://github.com/khawarizmus/powersync-nuxt/compare/v1.6.2...v1.7.0)
+
+### 🚀 Enhancements
+
+- Integrate UnoCSS as a Vite plugin and add inspector styles ([4d311e1](https://github.com/khawarizmus/powersync-nuxt/commit/4d311e1))
+
+### 🩹 Fixes
+
+- Dynamically import unocss styles ([fbd2c59](https://github.com/khawarizmus/powersync-nuxt/commit/fbd2c59))
+
+### 🏡 Chore
+
+- **release:** V1.6.2 ([55af8ae](https://github.com/khawarizmus/powersync-nuxt/commit/55af8ae))
+
+### ❤️ Contributors
+
+- Amine <amine@powersync.com>
+- Khawarizmus
+
 ## v1.6.2
 
 [compare changes](https://github.com/khawarizmus/powersync-nuxt/compare/v1.6.1...v1.6.2)

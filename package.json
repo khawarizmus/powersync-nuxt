@@ -1,6 +1,6 @@
 {
   "name": "powersync-nuxt",
-  "version": "1.6.2",
+  "version": "1.7.0",
   "description": "Powersync Nuxt module",
   "license": "MIT",
   "type": "module",
