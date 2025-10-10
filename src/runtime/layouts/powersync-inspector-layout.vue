@@ -51,7 +51,6 @@
 
 <script setup lang="ts">
 import { useRuntimeConfig } from '#imports'
-import '../assets/powersync-inspector.css'
 
 const useDiagnostics = useRuntimeConfig().public.powerSyncModuleOptions.useDiagnostics ?? false
 </script>
